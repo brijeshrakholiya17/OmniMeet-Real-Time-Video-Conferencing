@@ -43,7 +43,7 @@ app.use("/api/v1/users", userRoutes);
 // CRITICAL: This must be placed AFTER your API routes.
 // It catches any request that isn't an API call (like /home or /history) 
 // and sends the React index.html so the frontend router can handle it.
-app.get("*", (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.join(buildPath, "index.html"));
 });
 
