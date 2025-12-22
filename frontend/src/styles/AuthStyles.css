@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
+
+/* Main Container matching Landing Page */
+.auth-container {
+    width: 100vw;
+    height: 100vh;
+    background: url("/public/background1.png"); /* Matches your landing page */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "DM Sans", sans-serif;
+    color: white;
+}
+
+/* Glassmorphism Card */
+.auth-card {
+    background: rgba(20, 20, 20, 0.6); /* Dark semi-transparent background */
+    backdrop-filter: blur(10px);       /* Blur effect */
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Headings */
+.auth-header h2 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 600;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    font-weight: 300;
+    opacity: 0.8;
+    font-size: 0.95rem;
+}
+
+/* Form Inputs */
+.form-floating > .form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 12px;
+}
+
+.form-floating > .form-control:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: #EB5545; /* Your Theme Red */
+    box-shadow: 0 0 0 0.25rem rgba(235, 85, 69, 0.25);
+    color: white;
+}
+
+/* Label styling to ensure readability on dark background */
+.form-floating > label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Toggle Buttons (Sign In / Sign Up) */
+.btn-toggle-group {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    padding: 4px;
+    display: flex;
+    margin-bottom: 2rem;
+    margin-top: 1.5rem;
+}
+
+.btn-toggle {
+    border: none;
+    background: transparent;
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 25px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+}
+
+.btn-toggle.active {
+    background-color: #EB5545; /* Your Theme Red */
+    color: white;
+    box-shadow: 0 4px 12px rgba(235, 85, 69, 0.4);
+}
+
+/* Primary Button */
+.btn-primary-custom {
+    background-color: #EB5545;
+    border: none;
+    padding: 0.8rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 30px; /* Pill shape matching your landing page buttons */
+    transition: transform 0.2s, background-color 0.2s;
+    margin-top: 1rem;
+    width: 100%;
+    color: white;
+}
+
+.btn-primary-custom:hover {
+    background-color: #ff6b5b; /* Slightly lighter red */
+    transform: translateY(-2px);
+    color: white;
+}
+
+/* Toast Notification */
+.custom-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1050;
+    background: #EB5545;
+    color: white;
+    border-radius: 12px;
+}
+
+/* --- Fix for Browser Autofill (White Background Issue) --- */
+
+/* Target the autofill state */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    /* 1. Trick the browser into delaying the background color change for 5000s */
+    transition: background-color 5000s ease-in-out 0s;
+    
+    /* 2. Force the text color to remain white */
+    -webkit-text-fill-color: white !important;
+    
+    /* 3. Ensure the text cursor remains visible */
+    caret-color: white;
+}

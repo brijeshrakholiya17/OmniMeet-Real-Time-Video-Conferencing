@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
+
+.landingPageContainer {
+  width: 100vw;
+  height: 100vh;
+  background: url("/public/background1.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: white;
+  font-family: "DM Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.landingPageContainer nav {
+  padding-inline: 1.2rem;
+  padding-block: 1.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5vh 5vw;
+}
+
+.landingPageContainer nav h2 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+.landingPageContainer nav .navlist {
+  display: flex;
+  gap: 1.6rem;
+  cursor: pointer;
+}
+
+.btn-outline-custom-red {
+    color: #EB5545 !important;
+    border-color: #EB5545 !important;
+}
+
+/* Define what happens on hover */
+.btn-outline-custom-red:hover,
+.btn-outline-custom-red:active,
+.btn-outline-custom-red:focus {
+    color: #ffffff !important; /* White text on hover */
+    background-color: #EB5545 !important; /* Red background on hover */
+    border-color: #EB5545 !important;
+}
+
+.landingMainContainer {
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 3rem;
+  height: 80vh;
+  align-items: center;
+  padding: 5vh 5vw;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.landingMainContainer>div:nth-child(1) .typingText{
+  width: 30ch;
+  text-wrap: nowrap;
+  overflow: hidden; 
+  animation: typing 2s steps(30) infinite alternate-reverse;
+}
+
+.landingMainContainer>div:nth-child(1) {
+  font-size: 2rem;
+}
+.landingMainContainer>div:nth-child(1) h1 {
+  font-size: 5rem;
+  font-weight: 600;
+}
+
+.landingMainContainer>div:nth-child(1) div[role='button'] {
+  background: #EB5545;
+  width: fit-content;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  margin-top: 1.9rem;
+}
+
+.landingMainContainer>div:nth-child(1) div[role='button'] a {
+  text-decoration: none;
+  color: white;
+  font-size: 1.7rem;
+}
+
+.landingMainContainer>div:nth-child(2) img {
+  height: 70vh;
+  width: auto;
+}
+
+.navBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 20px;
+  text-align: center;
+}
+
+.meetContainer {
+  display: flex;
+  padding-inline: 20px;
+  height: 80vh;
+  gap: 10vw;
+  justify-content: center;
+}
+
+.leftPanel {
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+}
+
+.rightPanel {
+  display: flex;
+  align-items: center;
+}
+
+.rightPanel > img {
+  width: 30vw;
+  height: auto;
+  border-radius: 20px;
+}
+
+@keyframes typing {
+  from {
+    width: 0ch;
+  }
+  to {
+    width: 30ch;
+  }
+}
