@@ -1,144 +1,267 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@200..800&display=swap');
+
+/* =========================================
+   GLOBAL LAYOUT
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 .landingPageContainer {
-  width: 100vw;
-  height: 100vh;
-  background: url("/public/background1.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  color: white;
-  font-family: "DM Sans", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 300;
-  font-style: normal;
+    width: 100vw;
+    height: 100vh; /* Fallback */
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    background: url("/public/background1.png") no-repeat center center/cover;
+    color: white;
+    font-family: "DM Sans", sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* No scrolling allowed */
 }
 
-.landingPageContainer nav {
-  padding-inline: 1.2rem;
-  padding-block: 1.6rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5vh 5vw;
+/* =========================================
+   NAVIGATION
+   ========================================= */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    width: 100%;
+    z-index: 10;
 }
 
-.landingPageContainer nav h2 {
-  font-size: 1.8rem;
-  font-weight: 500;
-  font-family: "Bricolage Grotesque", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings:
-    "wdth" 100;
+.navHeader h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    font-family: "Bricolage Grotesque", sans-serif;
+    margin: 0;
+    background: linear-gradient(90deg, #fff, #ccc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.landingPageContainer nav .navlist {
-  display: flex;
-  gap: 1.6rem;
-  cursor: pointer;
+.navlist {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
 }
 
-.btn-outline-custom-red {
-    color: #EB5545 !important;
-    border-color: #EB5545 !important;
+/* Guest Button */
+.guestBtn {
+    cursor: pointer;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    transition: color 0.3s ease;
+}
+.guestBtn:hover {
+    color: white;
+    text-decoration: underline;
 }
 
-/* Define what happens on hover */
-.btn-outline-custom-red:hover,
-.btn-outline-custom-red:active,
-.btn-outline-custom-red:focus {
-    color: #ffffff !important; /* White text on hover */
-    background-color: #EB5545 !important; /* Red background on hover */
-    border-color: #EB5545 !important;
+/* Auth Buttons */
+.authBtn {
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
+.authBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.loginBtn {
+    border: 1px solid #EB5545;
+    color: #EB5545;
+}
+
+.loginBtn:hover {
+    background: #EB5545;
+    color: white;
+}
+
+/* =========================================
+   MAIN CONTENT
+   ========================================= */
 .landingMainContainer {
-  display: flex;
-  justify-content: space-between;
-  padding-inline: 3rem;
-  height: 80vh;
-  align-items: center;
-  padding: 5vh 5vw;
-  font-family: "DM Sans", sans-serif;
-  font-weight: 300;
-  font-style: italic;
+    display: flex;
+    flex: 1; /* Take remaining height */
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4rem;
+    gap: 2rem;
 }
 
-.landingMainContainer>div:nth-child(1) .typingText{
-  width: 30ch;
-  text-wrap: nowrap;
-  overflow: hidden; 
-  animation: typing 2s steps(30) infinite alternate-reverse;
+/* --- Text Section --- */
+.textSection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 600px;
 }
 
-.landingMainContainer>div:nth-child(1) {
-  font-size: 2rem;
-}
-.landingMainContainer>div:nth-child(1) h1 {
-  font-size: 5rem;
-  font-weight: 600;
-}
-
-.landingMainContainer>div:nth-child(1) div[role='button'] {
-  background: #EB5545;
-  width: fit-content;
-  padding: 0.5rem 1.5rem;
-  border-radius: 20px;
-  margin-top: 1.9rem;
+.textSection h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem); /* Responsive font size */
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1rem;
 }
 
-.landingMainContainer>div:nth-child(1) div[role='button'] a {
-  text-decoration: none;
-  color: white;
-  font-size: 1.7rem;
+.typingText {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    width: fit-content;
+    border-right: 2px solid rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    animation: typing 3.5s steps(30, end), blink-caret 0.75s step-end infinite;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
 }
 
-.landingMainContainer>div:nth-child(2) img {
-  height: 70vh;
-  width: auto;
+/* Action Button */
+.actionBtn {
+    background: #EB5545;
+    width: fit-content;
+    padding: 12px 30px;
+    border-radius: 50px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.navBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-inline: 20px;
-  text-align: center;
+.actionBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(235, 85, 69, 0.4);
 }
 
-.meetContainer {
-  display: flex;
-  padding-inline: 20px;
-  height: 80vh;
-  gap: 10vw;
-  justify-content: center;
+.actionBtn a {
+    text-decoration: none;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
-.leftPanel {
-  height: 100%;
-  display: flex;
-  align-items: center;
-
+/* --- Image Section --- */
+.imageSection {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
-.rightPanel {
-  display: flex;
-  align-items: center;
+.imageSection img {
+    max-width: 100%;
+    max-height: 75vh; /* Keep image inside screen */
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+    animation: float 6s ease-in-out infinite;
 }
 
-.rightPanel > img {
-  width: 30vw;
-  height: auto;
-  border-radius: 20px;
-}
-
+/* =========================================
+   ANIMATIONS
+   ========================================= */
 @keyframes typing {
-  from {
-    width: 0ch;
-  }
-  to {
-    width: 30ch;
-  }
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: white; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+/* =========================================
+   RESPONSIVE MEDIA QUERIES (1000% Perfect)
+   ========================================= */
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
+    nav { padding: 1.5rem 2rem; }
+    .landingMainContainer { padding: 0 2rem; gap: 1rem; }
+    .imageSection img { max-height: 50vh; }
+}
+
+/* Mobile (max-width: 900px) */
+@media (max-width: 900px) {
+    .landingPageContainer {
+        height: 100dvh;
+    }
+
+    nav {
+        padding: 1rem 1.5rem;
+    }
+
+    .navHeader h2 {
+        font-size: 1.5rem;
+    }
+
+    .navlist {
+        gap: 0.8rem;
+    }
+
+    /* Hide "Join as Guest" on very small screens to save space, or reduce size */
+    .guestBtn {
+        font-size: 0.85rem;
+    }
+
+    .authBtn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Stack Layout: Image Top, Text Bottom */
+    .landingMainContainer {
+        flex-direction: column-reverse; /* Text below image */
+        justify-content: center; /* Center content vertically */
+        padding: 1rem 1.5rem;
+        gap: 2rem;
+        text-align: center;
+    }
+
+    /* Image on Mobile */
+    .imageSection {
+        flex: 0 1 auto; /* Don't grow aggressively */
+        height: auto;
+    }
+
+    .imageSection img {
+        max-height: 40vh; /* Keep image manageable */
+        max-width: 80%;
+    }
+
+    /* Text on Mobile */
+    .textSection {
+        flex: 0 0 auto; /* Stop stretching */
+        align-items: center; /* Center buttons */
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .typingText {
+        margin: 0 auto 2rem auto; /* Center the typing animation */
+        font-size: 1rem;
+    }
+}
+
+/* Very Small Mobile (max-width: 380px) */
+@media (max-width: 380px) {
+    .navlist { gap: 0.5rem; }
+    .guestBtn { display: none; } /* Hide guest text on tiny screens */
+    
+    .textSection h1 { font-size: 2rem; }
+    .imageSection img { max-height: 35vh; }
 }

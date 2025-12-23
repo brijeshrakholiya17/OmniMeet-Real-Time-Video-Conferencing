@@ -17,6 +17,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import server from '../environment';
 import axios from 'axios'; 
+import { AuthContext } from '../contexts/AuthContext';
 
 const server_url = server;
 
@@ -290,14 +291,23 @@ export default function VideoMeetComponent() {
         const formatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
         
         try {
-            await axios.post(`${server_url}/api/v1/users/add_to_history`, {
+            // --- DEBUG LOG ---
+            console.log("ATTEMPTING TO SAVE HISTORY...");
+
+            const response = await axios.post(`${server_url}/api/v1/users/add_to_activity`, {
                 token: localStorage.getItem("token"),
                 meeting_code: window.location.pathname.split('/').pop(),
                 startTime: formatter.format(startTimeRef.current),
                 endTime: formatter.format(endTime)
             });
+
+            // --- SUCCESS CONFIRMATION ---
+            console.log("HISTORY SAVED! Server Responded:", response.data);
+            // alert("Meeting saved to History!"); // Uncomment if you want a popup verification
+
         } catch (e) {
             console.error("Error saving history:", e);
+            alert("Failed to save history: " + e.message);
         }
 
         try { 

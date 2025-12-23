@@ -33,16 +33,13 @@ app.use(express.urlencoded({ limit: "40kb", extended: true }));
 
 // 1. Serve Static Files (The React App)
 // This logic assumes your app.js is in 'backend/src/' and the build folder is in 'backend/build/'
-const buildPath = path.join(__dirname, "../build"); 
+const buildPath = path.resolve(__dirname, "../../frontend/build");
 app.use(express.static(buildPath));
 
 // 2. API Routes
 app.use("/api/v1/users", userRoutes);
 
 // 3. Handle React Routing (Wildcard)
-// CRITICAL: This must be placed AFTER your API routes.
-// It catches any request that isn't an API call (like /home or /history) 
-// and sends the React index.html so the frontend router can handle it.
 app.get(/.*/, (req, res) => {
     res.sendFile(path.join(buildPath, "index.html"));
 });

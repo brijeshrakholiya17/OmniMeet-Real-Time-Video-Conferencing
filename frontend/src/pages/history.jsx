@@ -23,8 +23,25 @@ export default function History() {
         const fetchHistory = async () => {
             try {
                 const history = await getHistoryOfUser();
-                setMeetings(history.reverse());
+                
+                // --- DEBUGGING LOG ---
+                console.log("HISTORY DATA RECEIVED:", history); 
+
+                // Check if 'history' is an array before reversing
+                if (Array.isArray(history)) {
+                    setMeetings(history.reverse());
+                } else if (history.activity) {
+                    // Scenario: Backend returns { message: "...", activity: [...] }
+                    setMeetings(history.activity.reverse());
+                } else if (history.meetings) {
+                    // Scenario: Backend returns { meetings: [...] }
+                    setMeetings(history.meetings.reverse());
+                } else {
+                    console.error("Invalid history format:", history);
+                }
+                
             } catch (err) {
+                console.log(err); // See the real error in Console
                 setError("Failed to fetch meeting history");
                 setOpen(true);
             }

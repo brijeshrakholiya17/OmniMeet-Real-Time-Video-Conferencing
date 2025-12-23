@@ -5,20 +5,26 @@ import "../styles/HomeComponent.css";
 import { Button, IconButton, TextField } from '@mui/material';
 import RestoreIcon from '@mui/icons-material/Restore';
 import { AuthContext } from '../contexts/AuthContext';
+// --- NEW IMPORTS FOR MENU ---
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 function HomeComponent() {
 
     let navigate = useNavigate();
     const [meetingCode, setMeetingCode] = useState("");
+    const [isMenuOpen, setIsMenuOpen] = useState(false); // State for Mobile Menu
 
-    // Removed addToUserHistory from here to prevent 500 error
     const { handleLogout } = useContext(AuthContext);
 
     let handleJoinVideoCall = async () => {
         if(meetingCode.trim() === "") return; 
-        
-        // Just navigate. History is now saved in videomeet.jsx on "End Call"
         navigate(`/${meetingCode}`)
+    }
+
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
     }
 
     return (
@@ -30,8 +36,9 @@ function HomeComponent() {
                     <h2 className="logoText">OmniMeet</h2>
                 </div>
 
-                <div className="navRight">
-                    {/* History Section */}
+                {/* --- DESKTOP NAV (Added class 'desktopNav') --- */}
+                {/* This will be hidden on mobile by your CSS */}
+                <div className="navRight desktopNav">
                     <div className="historyBtn" onClick={() => navigate("/history")}>
                         <IconButton className="iconBtn">
                             <RestoreIcon />
@@ -39,7 +46,6 @@ function HomeComponent() {
                         <p>History</p>
                     </div>
 
-                    {/* Logout Button */}
                     <Button 
                         onClick={handleLogout} 
                         className="logoutBtn" 
@@ -48,7 +54,28 @@ function HomeComponent() {
                         Logout
                     </Button>
                 </div>
+
+                {/* --- MOBILE MENU ICON (Visible only on Mobile) --- */}
+                <div className="mobileMenuIcon">
+                    <IconButton onClick={toggleMenu} style={{color: 'white'}}>
+                        {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
+                    </IconButton>
+                </div>
             </div>
+
+            {/* --- MOBILE DROPDOWN (Conditionally Rendered) --- */}
+            {isMenuOpen && (
+                <div className="mobileMenuDropdown">
+                    <div className="mobileMenuItem" onClick={() => navigate("/history")}>
+                        <RestoreIcon fontSize="small" />
+                        <span>History</span>
+                    </div>
+                    <div className="mobileMenuItem" onClick={handleLogout}>
+                        <LogoutIcon fontSize="small" />
+                        <span>Logout</span>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content */}
             <div className="meetContainer">

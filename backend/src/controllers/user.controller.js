@@ -1,7 +1,6 @@
 import httpStatus from "http-status";
 import bcrypt from "bcrypt";
 import { User } from "../models/users.model.js";
-import { Meeting } from "../models/meeting.model.js";
 import crypto from "crypto";
 
 const login = async (req, res) => {
@@ -36,7 +35,8 @@ const register = async (req, res) => {
         const newUser = new User({
             name: name,
             username: username,
-            password: hashedPassword
+            password: hashedPassword,
+            meetingHistory: [] // Initialize empty history
         });
         await newUser.save();
         return res.status(httpStatus.CREATED).json({ message: "User Registered Successfully" });
@@ -45,9 +45,10 @@ const register = async (req, res) => {
     }
 }
 
-// --- NEW FUNCTION: Add Meeting to History ---
+// --- FIX: Add Meeting to History ---
 const addToActivity = async (req, res) => {
-    const { token, meeting_code } = req.body;
+    // 1. Get startTime and endTime from the request
+    const { token, meeting_code, startTime, endTime } = req.body;
 
     try {
         const user = await User.findOne({ token: token });
@@ -56,11 +57,12 @@ const addToActivity = async (req, res) => {
             return res.status(httpStatus.NOT_FOUND).json({ message: "User not found" });
         }
 
-        user.meetingHistory.push({
+        // 2. FIX: Use 'history' (not meetingHistory) to match your User Model
+        user.history.push({
             meetingCode: meeting_code,
             date: new Date(),
-            startTime: startTime,
-            endTime: endTime
+            startTime: startTime || "N/A", // Save the times sent from frontend
+            endTime: endTime || "N/A"
         });
 
         await user.save();
@@ -71,7 +73,7 @@ const addToActivity = async (req, res) => {
     }
 }
 
-// --- NEW FUNCTION: Get User History ---
+// --- FIX: Get User History ---
 const getUserHistory = async (req, res) => {
     const { token } = req.query;
 
@@ -82,12 +84,13 @@ const getUserHistory = async (req, res) => {
             return res.status(httpStatus.NOT_FOUND).json({ message: "User not found" });
         }
 
-        return res.status(httpStatus.OK).json(user.meetingHistory);
+        // 3. FIX: Return 'history' array
+        // We use || [] to prevent crashes if history is undefined
+        return res.status(httpStatus.OK).json(user.history || []);
 
     } catch (e) {
         return res.status(500).json({ message: `Something went wrong ${e}` });
     }
 }
 
-// Export all 4 functions
 export { login, register, addToActivity, getUserHistory };
