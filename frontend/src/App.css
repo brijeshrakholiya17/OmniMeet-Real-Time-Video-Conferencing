@@ -13,14 +13,14 @@
 
 .landingPageContainer {
     width: 100vw;
-    height: 100vh; /* Fallback */
-    height: 100dvh; /* Dynamic viewport height for mobile */
+    height: 100vh;
+    height: 100dvh;
     background: url("/public/background1.png") no-repeat center center/cover;
     color: white;
     font-family: "DM Sans", sans-serif;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* No scrolling allowed */
+    overflow: hidden;
 }
 
 /* =========================================
@@ -51,19 +51,14 @@ nav {
     align-items: center;
 }
 
-/* Guest Button */
 .guestBtn {
     cursor: pointer;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.8);
     transition: color 0.3s ease;
 }
-.guestBtn:hover {
-    color: white;
-    text-decoration: underline;
-}
+.guestBtn:hover { color: white; text-decoration: underline; }
 
-/* Auth Buttons */
 .authBtn {
     cursor: pointer;
     font-weight: 600;
@@ -72,27 +67,17 @@ nav {
     border-radius: 8px;
     transition: all 0.3s ease;
 }
+.authBtn:hover { background: rgba(255, 255, 255, 0.1); }
 
-.authBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.loginBtn {
-    border: 1px solid #EB5545;
-    color: #EB5545;
-}
-
-.loginBtn:hover {
-    background: #EB5545;
-    color: white;
-}
+.loginBtn { border: 1px solid #EB5545; color: #EB5545; }
+.loginBtn:hover { background: #EB5545; color: white; }
 
 /* =========================================
    MAIN CONTENT
    ========================================= */
 .landingMainContainer {
     display: flex;
-    flex: 1; /* Take remaining height */
+    flex: 1;
     width: 100%;
     align-items: center;
     justify-content: center;
@@ -100,7 +85,6 @@ nav {
     gap: 2rem;
 }
 
-/* --- Text Section --- */
 .textSection {
     flex: 1;
     display: flex;
@@ -110,24 +94,30 @@ nav {
 }
 
 .textSection h1 {
-    font-size: clamp(2.5rem, 5vw, 4.5rem); /* Responsive font size */
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
     font-weight: 700;
     line-height: 1.1;
     margin-bottom: 1rem;
 }
 
+/* --- FIXED TYPING TEXT CSS --- */
 .typingText {
     font-size: clamp(1rem, 2vw, 1.5rem);
     width: fit-content;
-    border-right: 2px solid rgba(255, 255, 255, 0.75);
-    white-space: nowrap;
-    overflow: hidden;
-    animation: typing 3.5s steps(30, end), blink-caret 0.75s step-end infinite;
+    display: inline-block;
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: 2rem;
+    white-space: nowrap;
+    
+    /* The Cursor Logic */
+    border-right: 3px solid #EB5545; /* Red cursor to match theme */
+    padding-right: 4px; /* Space between text and cursor */
+    min-height: 1.5em; /* Prevents jumping before text starts */
+    
+    /* Only blink animation needed now */
+    animation: blink-caret 0.75s step-end infinite;
 }
 
-/* Action Button */
 .actionBtn {
     background: #EB5545;
     width: fit-content;
@@ -148,7 +138,6 @@ nav {
     font-weight: 600;
 }
 
-/* --- Image Section --- */
 .imageSection {
     flex: 1;
     display: flex;
@@ -159,7 +148,7 @@ nav {
 
 .imageSection img {
     max-width: 100%;
-    max-height: 75vh; /* Keep image inside screen */
+    max-height: 75vh;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
@@ -169,14 +158,11 @@ nav {
 /* =========================================
    ANIMATIONS
    ========================================= */
-@keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
-}
 
+/* Cursor Blink Animation */
 @keyframes blink-caret {
     from, to { border-color: transparent; }
-    50% { border-color: white; }
+    50% { border-color: #EB5545; }
 }
 
 @keyframes float {
@@ -185,83 +171,49 @@ nav {
 }
 
 /* =========================================
-   RESPONSIVE MEDIA QUERIES (1000% Perfect)
+   RESPONSIVE MEDIA QUERIES
    ========================================= */
-
-/* Tablet (max-width: 1024px) */
 @media (max-width: 1024px) {
     nav { padding: 1.5rem 2rem; }
     .landingMainContainer { padding: 0 2rem; gap: 1rem; }
     .imageSection img { max-height: 50vh; }
 }
 
-/* Mobile (max-width: 900px) */
 @media (max-width: 900px) {
-    .landingPageContainer {
-        height: 100dvh;
-    }
+    .landingPageContainer { height: 100dvh; }
+    nav { padding: 1rem 1.5rem; }
+    .navHeader h2 { font-size: 1.5rem; }
+    .navlist { gap: 0.8rem; }
+    .guestBtn { font-size: 0.85rem; }
+    .authBtn { padding: 6px 12px; font-size: 0.85rem; }
 
-    nav {
-        padding: 1rem 1.5rem;
-    }
-
-    .navHeader h2 {
-        font-size: 1.5rem;
-    }
-
-    .navlist {
-        gap: 0.8rem;
-    }
-
-    /* Hide "Join as Guest" on very small screens to save space, or reduce size */
-    .guestBtn {
-        font-size: 0.85rem;
-    }
-
-    .authBtn {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-    }
-
-    /* Stack Layout: Image Top, Text Bottom */
     .landingMainContainer {
-        flex-direction: column-reverse; /* Text below image */
-        justify-content: center; /* Center content vertically */
+        flex-direction: column-reverse;
+        justify-content: center;
         padding: 1rem 1.5rem;
         gap: 2rem;
         text-align: center;
     }
 
-    /* Image on Mobile */
-    .imageSection {
-        flex: 0 1 auto; /* Don't grow aggressively */
-        height: auto;
-    }
+    .imageSection { flex: 0 1 auto; height: auto; }
+    .imageSection img { max-height: 40vh; max-width: 80%; }
 
-    .imageSection img {
-        max-height: 40vh; /* Keep image manageable */
-        max-width: 80%;
-    }
-
-    /* Text on Mobile */
     .textSection {
-        flex: 0 0 auto; /* Stop stretching */
-        align-items: center; /* Center buttons */
+        flex: 0 0 auto;
+        align-items: center;
         width: 100%;
         margin-bottom: 2rem;
     }
 
     .typingText {
-        margin: 0 auto 2rem auto; /* Center the typing animation */
+        margin: 0 auto 2rem auto;
         font-size: 1rem;
     }
 }
 
-/* Very Small Mobile (max-width: 380px) */
 @media (max-width: 380px) {
     .navlist { gap: 0.5rem; }
-    .guestBtn { display: none; } /* Hide guest text on tiny screens */
-    
+    .guestBtn { display: none; }
     .textSection h1 { font-size: 2rem; }
     .imageSection img { max-height: 35vh; }
 }

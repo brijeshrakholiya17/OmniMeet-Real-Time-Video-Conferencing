@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react'
-import "../App.css" // Ensure this imports the new CSS below
+import React, { useContext, useState, useEffect } from 'react' // <--- Added useEffect
+import "../App.css"
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../contexts/AuthContext';
 import { Snackbar, Alert } from '@mui/material'; 
@@ -10,6 +10,25 @@ export default function LandingPage() {
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
+
+    // --- TYPEWRITER STATE ---
+    const [typedText, setTypedText] = useState("");
+    const targetText = "Cover a distance by OmniMeet";
+
+    // --- TYPEWRITER LOGIC ---
+    useEffect(() => {
+        let index = 0;
+        const typingInterval = setInterval(() => {
+            if (index <= targetText.length) {
+                setTypedText(targetText.slice(0, index));
+                index++;
+            } else {
+                clearInterval(typingInterval);
+            }
+        }, 100); // Adjust typing speed (ms) here
+
+        return () => clearInterval(typingInterval);
+    }, []);
 
     const logoutUser = () => {
         handleLogout(); 
@@ -48,7 +67,10 @@ export default function LandingPage() {
             <div className="landingMainContainer">
                 <div className="textSection">
                     <h1><span style={{ color: "#EB5545" }}>Connect</span> with your loved Ones</h1>
-                    <p className='typingText'>Cover a distance by OmniMeet</p>
+                    
+                    {/* UPDATED TYPING TEXT ELEMENT */}
+                    <p className='typingText'>{typedText}</p>
+                    
                     <div className="actionBtn" role='button'>
                         <Link to={userData ? "/home" : "/auth"}>Get Started</Link>
                     </div>
