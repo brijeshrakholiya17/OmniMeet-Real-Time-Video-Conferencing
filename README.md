@@ -10,6 +10,7 @@ OmniMeet is a full-stack video conferencing application built to facilitate seam
 This project demonstrates advanced proficiency in Full-Stack Development, WebRTC protocols, and Socket-based networking.
 
 🌟 Key Features
+
 ⚡ Real-Time Video & Audio: High-quality, low-latency streaming using WebRTC mesh architecture.
 
 🔒 Secure Authentication: Custom JWT-based authentication system with Bcrypt password hashing.
@@ -25,6 +26,7 @@ This project demonstrates advanced proficiency in Full-Stack Development, WebRTC
 🎛️ Media Controls: Dynamic toggling of Audio, Video, and Screen Sharing capabilities.
 
 🛠️ Tech Stack & Architecture
+
 Frontend (Client-Side)
 Framework: React.js (Vite/CRA)
 
@@ -54,4 +56,5 @@ Bcrypt.js: For encryption of sensitive user data.
 Created by Brijesh Rakholiya - 3rd Year Computer Science Student.
 
 LinkedIn: www.linkedin.com/in/brijeshrakholiya17
+
 Email: brijeshrakholiya001@gmail.com
