@@ -1,60 +1,91 @@
-🎥 OmniMeet - Real-Time Video Conferencing Platform
+# 🎥 OmniMeet – Real-Time Video Conferencing Platform
 
-(Replace this link with a real screenshot of your Landing Page later)
+![OmniMeet Banner](https://via.placeholder.com/1000x300?text=OmniMeet+Project+Showcase)
 
-🔴 Live Demo: https://omnimeet-app.onrender.com
+<div align="center">
 
-🚀 Overview
-OmniMeet is a full-stack video conferencing application built to facilitate seamless real-time communication. Engineered with a focus on low latency and high availability, it enables users to create meetings, join via secure codes, and collaborate using video, audio, and real-time chat.
+  ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+  ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+  ![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101)
+  ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+  ![MUI](https://img.shields.io/badge/MUI-%230081CB.svg?style=for-the-badge&logo=mui&logoColor=white)
 
-This project demonstrates advanced proficiency in Full-Stack Development, WebRTC protocols, and Socket-based networking.
+  <h3>
+    <a href="https://omnimeet-app.onrender.com">🔴 View Live Demo</a>
+  </h3>
+</div>
 
-🌟 Key Features
+---
 
-⚡ Real-Time Video & Audio: High-quality, low-latency streaming using WebRTC mesh architecture.
+## 🚀 Overview
 
-🔒 Secure Authentication: Custom JWT-based authentication system with Bcrypt password hashing.
+**OmniMeet** is a production-grade, full-stack video conferencing application engineered to facilitate seamless real-time communication. Built with a focus on low latency and high availability, it enables users to create instant meetings, join via secure codes, and collaborate using HD video, crystal-clear audio, and real-time chat.
 
-💬 Live Chat: Integrated real-time messaging using Socket.io with instant delivery.
+This project demonstrates advanced proficiency in **Full-Stack Development**, **WebRTC Mesh Architecture**, and **WebSocket Networking**.
 
-📅 Meeting History: persistent tracking of past meetings, including participants and timestamps (MongoDB).
+---
 
-📱 Fully Responsive: Adaptive UI that works seamlessly on Desktops, Tablets, and Mobile (Android/iOS).
+## 🌟 Key Features
 
-🛡️ Guest Mode: Allows users to join meetings quickly without account creation for friction-less access.
+* **⚡ Real-Time Video & Audio**
+    * High-quality, low-latency streaming using **WebRTC** peer-to-peer protocols.
+    * Mesh architecture ensures direct data transfer between users for maximum security.
 
-🎛️ Media Controls: Dynamic toggling of Audio, Video, and Screen Sharing capabilities.
+* **💬 Instant Chat & Collaboration**
+    * Integrated real-time messaging system powered by **Socket.io**.
+    * Zero-delay message delivery with visual notifications.
 
-🛠️ Tech Stack & Architecture
+* **🔒 Enterprise-Grade Security**
+    * **JWT Authentication:** Stateless, secure user sessions.
+    * **Bcrypt Hashing:** Industry-standard encryption for user credentials.
+    * **Secure Sockets:** Middleware authentication prevents unauthorized connection attempts.
 
-Frontend (Client-Side)
-Framework: React.js (Vite/CRA)
+* **📅 Smart Meeting History**
+    * Persistent tracking of past meetings, timestamps, and activity logs stored in **MongoDB**.
+    * Dashboard view to revisit previous connection details.
 
-Styling: Material UI (MUI) + Custom CSS/Modules
+* **📱 Fully Responsive Design**
+    * Adaptive UI that scales perfectly from 4K Desktops to Mobile devices.
+    * Custom mobile navigation and touch-friendly controls.
 
-State Management: React Context API
+* **🎛️ Advanced Media Controls**
+    * Dynamic toggling of Audio, Video, and Screen Sharing capabilities.
+    * "Lobby Mode" allows users to preview video/audio before joining.
 
-Routing: React Router DOM
+---
 
-Backend (Server-Side)
-Runtime: Node.js
+## 🛠️ Tech Stack
 
-Framework: Express.js
+| Domain | Technologies Used |
+| :--- | :--- |
+| **Frontend** | React.js, Vite, Material UI (MUI), React Router DOM, Context API |
+| **Backend** | Node.js, Express.js, Socket.io (Signaling Server) |
+| **Database** | MongoDB Atlas (Cloud), Mongoose ORM |
+| **Core** | WebRTC (Peer-to-Peer), JWT, Bcrypt.js, REST APIs |
+| **DevOps** | Render (Cloud Deployment), Git/GitHub |
 
-Real-Time Engine: Socket.io (Signaling Server)
+---
 
-Database: MongoDB (Atlas Cloud) with Mongoose ORM
+## 📸 Application Screenshots
 
-Core Technologies
-WebRTC: For peer-to-peer media streaming.
+| **Landing Page** | **Home Page** |
+|:---:|:---:|
+| <img src="./screenshots/Landing page.png" width="400" alt="Landing Page"> | <img src="./screenshots/Home.png" width="400" alt="Home page"> |
+| *Modern, responsive landing interface* | *Real-time video grid with controls* |
 
-JWT (JSON Web Tokens): For stateless, secure user sessions.
+<br>
 
-Bcrypt.js: For encryption of sensitive user data.
+| **Meeting Room** | **Meeting History** |
+|:---:|:---:|
+| <img src="./screenshots/Meeting user 3.png" width="400" alt="Meeting Room"> | <img src="./screenshots/History.jpeg" width="400" alt="History Dashboard"> |
+| *Optimized for smaller screens* | *Persistent logs of past activities* |
 
-📬 Contact
-Created by Brijesh Rakholiya - 3rd Year Computer Science Student.
+---
 
-LinkedIn: www.linkedin.com/in/brijeshrakholiya17
+<div align="center">
+  
+  **Created by Brijesh RAkholiya**
+  
+  [LinkedIn](https://linkedin.com/in/brijeshrakholiya17) • [GitHub](https://github.com/brijeshrakholiya17) • [Email](mailto:brijeshrakholiya001@gmail.com)
 
-Email: brijeshrakholiya001@gmail.com
+</div>
