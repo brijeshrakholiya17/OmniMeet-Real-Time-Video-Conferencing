@@ -1,6 +1,7 @@
 # 🎥 OmniMeet – Real-Time Video Conferencing Platform
 
-![OmniMeet Banner](https://via.placeholder.com/1000x300?text=OmniMeet+Project+Showcase)
+## OmniMeet Banner
+<img src="./screenshots/banner_magic.png" width="400" alt="Banner">
 
 <div align="center">
 
@@ -70,7 +71,7 @@ This project demonstrates advanced proficiency in **Full-Stack Development**, **
 
 | **Landing Page** | **Home Page** |
 |:---:|:---:|
-| <img src="./screenshots/Landing page.png" width="400" alt="Landing Page"> | <img src="./screenshots/Home.png" width="400" alt="Home page"> |
+| <img src="./screenshots/Landing page.png" width="400" alt="Landing Page"> | <img src="./screenshots/Home page.png" width="400" alt="Home page"> |
 | *Modern, responsive landing interface* | *Real-time video grid with controls* |
 
 <br>
@@ -84,7 +85,7 @@ This project demonstrates advanced proficiency in **Full-Stack Development**, **
 
 <div align="center">
   
-  **Created by Brijesh RAkholiya**
+  **Created by Brijesh Rakholiya**
   
   [LinkedIn](https://linkedin.com/in/brijeshrakholiya17) • [GitHub](https://github.com/brijeshrakholiya17) • [Email](mailto:brijeshrakholiya001@gmail.com)
 
