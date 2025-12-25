@@ -1,7 +1,7 @@
 # 🎥 OmniMeet – Real-Time Video Conferencing Platform
 
 ## OmniMeet Banner
-<img src="./screenshots/banner_magic.png" width="400" alt="Banner">
+<img src="./screenshots/banner_magic.png" width="1000" alt="Banner">
 
 <div align="center">
 
