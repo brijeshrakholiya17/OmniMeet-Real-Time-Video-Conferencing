@@ -15,6 +15,12 @@ export default function LandingPage() {
     const [typedText, setTypedText] = useState("");
     const targetText = "Cover a distance by OmniMeet";
 
+    const generateRoomCode = () => {
+        const chars = "abcdefghijklmnopqrstuvwxyz";
+        const segment = (len) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+        return `${segment(3)}-${segment(4)}-${segment(3)}`;
+    };
+
     // --- TYPEWRITER LOGIC ---
     useEffect(() => {
         let index = 0;
@@ -43,7 +49,10 @@ export default function LandingPage() {
                     <h2>OmniMeet</h2>
                 </div>
                 <div className='navlist'>
-                    <div className='guestBtn' onClick={() => router("/aljk23")}>
+                    <div className='guestBtn' onClick={() => {
+                        const roomId = generateRoomCode();
+                        router(`/${roomId}`);
+                    }}>
                         Join as Guest
                     </div>
 

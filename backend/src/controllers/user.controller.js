@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import bcrypt from "bcrypt";
 import { User } from "../models/users.model.js";
-import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 const login = async (req, res) => {
     const { username, password } = req.body;
@@ -12,7 +12,11 @@ const login = async (req, res) => {
         }
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
-            let token = crypto.randomBytes(20).toString("hex");
+            let token = jwt.sign(
+                { id: user._id },
+                process.env.JWT_SECRET || "fallback_secret",
+                { expiresIn: "24h" }
+            );
             user.token = token;
             await user.save();
             return res.status(httpStatus.OK).json({ token: token });
@@ -45,23 +49,17 @@ const register = async (req, res) => {
     }
 }
 
-// --- FIX: Add Meeting to History ---
+// Secured with authMiddleware
 const addToActivity = async (req, res) => {
-    // 1. Get startTime and endTime from the request
-    const { token, meeting_code, startTime, endTime } = req.body;
+    const { meeting_code, startTime, endTime } = req.body;
 
     try {
-        const user = await User.findOne({ token: token });
-        
-        if (!user) {
-            return res.status(httpStatus.NOT_FOUND).json({ message: "User not found" });
-        }
+        const user = req.user;
 
-        // 2. FIX: Use 'history' (not meetingHistory) to match your User Model
         user.history.push({
             meetingCode: meeting_code,
             date: new Date(),
-            startTime: startTime || "N/A", // Save the times sent from frontend
+            startTime: startTime || "N/A",
             endTime: endTime || "N/A"
         });
 
@@ -73,21 +71,11 @@ const addToActivity = async (req, res) => {
     }
 }
 
-// --- FIX: Get User History ---
+// Secured with authMiddleware
 const getUserHistory = async (req, res) => {
-    const { token } = req.query;
-
     try {
-        const user = await User.findOne({ token: token });
-        
-        if (!user) {
-            return res.status(httpStatus.NOT_FOUND).json({ message: "User not found" });
-        }
-
-        // 3. FIX: Return 'history' array
-        // We use || [] to prevent crashes if history is undefined
+        const user = req.user;
         return res.status(httpStatus.OK).json(user.history || []);
-
     } catch (e) {
         return res.status(500).json({ message: `Something went wrong ${e}` });
     }

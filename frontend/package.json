@@ -16,7 +16,6 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.6",
     "axios": "^1.13.2",
-    "bootstrap": "^5.3.8",
     "http-status": "^2.1.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

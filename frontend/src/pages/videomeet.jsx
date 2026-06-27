@@ -21,7 +21,7 @@ import { AuthContext } from '../contexts/AuthContext';
 
 const server_url = server;
 
-var connections = {};
+// connections global variable removed to prevent cross-session leaks
 
 const peerConfigConnections = {
     "iceServers": [
@@ -35,6 +35,8 @@ export default function VideoMeetComponent() {
     let socketIdRef = useRef();
     let localVideoref = useRef();
     let usernameMapRef = useRef({}); 
+    const connectionsRef = useRef({});
+    const pendingICEQueue = useRef({});
 
     let [videoAvailable, setVideoAvailable] = useState(true);
     let [audioAvailable, setAudioAvailable] = useState(true);
@@ -60,6 +62,8 @@ export default function VideoMeetComponent() {
     const startTimeRef = useRef(new Date()); 
 
     const [videos, setVideos] = useState([]);
+    const [sidebarWidth, setSidebarWidth] = useState(360);
+    const [isDragging, setIsDragging] = useState(false);
 
     useEffect(() => {
         if (navigator.mediaDevices.getDisplayMedia) {
@@ -67,8 +71,61 @@ export default function VideoMeetComponent() {
         }
 
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
+        
+        return () => {
+            clearInterval(timer);
+            
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+            }
+
+            if (connectionsRef.current) {
+                for (let id in connectionsRef.current) {
+                    if (connectionsRef.current[id]) {
+                        connectionsRef.current[id].close();
+                    }
+                }
+                connectionsRef.current = {};
+            }
+
+            if (window.localStream) {
+                window.localStream.getTracks().forEach(track => track.stop());
+                window.localStream = null;
+            }
+
+            pendingICEQueue.current = {};
+        };
     }, [])
+
+    useEffect(() => {
+        if (!isDragging) return;
+
+        const handleMouseMove = (e) => {
+            const newWidth = window.innerWidth - e.clientX;
+            const minWidth = 250;
+            const maxWidth = window.innerWidth * 0.5;
+            if (newWidth >= minWidth && newWidth <= maxWidth) {
+                setSidebarWidth(newWidth);
+            }
+        };
+
+        const handleMouseUp = () => {
+            setIsDragging(false);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging]);
+
+    const handleMouseDown = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
 
     // --- LOBBY MEDIA PREVIEW LOGIC ---
     useEffect(() => {
@@ -166,10 +223,10 @@ export default function VideoMeetComponent() {
                 }
                 window.localStream.addTrack(newTrack);
 
-                for (let id in connections) {
-                    const sender = connections[id].getSenders().find(s => s.track && s.track.kind === type);
+                for (let id in connectionsRef.current) {
+                    const sender = connectionsRef.current[id].getSenders().find(s => s.track && s.track.kind === type);
                     if (sender) sender.replaceTrack(newTrack);
-                    else connections[id].addTrack(newTrack, window.localStream);
+                    else connectionsRef.current[id].addTrack(newTrack, window.localStream);
                 }
 
                 if(localVideoref.current) localVideoref.current.srcObject = window.localStream;
@@ -189,8 +246,8 @@ export default function VideoMeetComponent() {
                 }
                 window.localStream.addTrack(dummyTrack);
 
-                for (let id in connections) {
-                    const sender = connections[id].getSenders().find(s => s.track && s.track.kind === type);
+                for (let id in connectionsRef.current) {
+                    const sender = connectionsRef.current[id].getSenders().find(s => s.track && s.track.kind === type);
                     if (sender) sender.replaceTrack(dummyTrack);
                 }
 
@@ -229,15 +286,15 @@ export default function VideoMeetComponent() {
             localVideoref.current.srcObject = window.localStream;
 
             // 4. Update Remote Peers
-            for (let id in connections) {
+            for (let id in connectionsRef.current) {
                 if (id === socketIdRef.current) continue;
                 // Safety check: ensure track exists before checking kind
-                const sender = connections[id].getSenders().find(s => s.track && s.track.kind === 'video');
+                const sender = connectionsRef.current[id].getSenders().find(s => s.track && s.track.kind === 'video');
                 if (sender) {
                     sender.replaceTrack(screenTrack);
                 } else {
                     // Fallback if sender wasn't found (rare)
-                    connections[id].addTrack(screenTrack, window.localStream);
+                    connectionsRef.current[id].addTrack(screenTrack, window.localStream);
                 }
             }
 
@@ -253,9 +310,9 @@ export default function VideoMeetComponent() {
                     window.localStream.addTrack(cameraTrack);
                     localVideoref.current.srcObject = window.localStream;
 
-                    for (let id in connections) {
+                    for (let id in connectionsRef.current) {
                         if (id === socketIdRef.current) continue;
-                        const sender = connections[id].getSenders().find(s => s.track && s.track.kind === 'video');
+                        const sender = connectionsRef.current[id].getSenders().find(s => s.track && s.track.kind === 'video');
                         if (sender) sender.replaceTrack(cameraTrack);
                     }
 
@@ -290,24 +347,32 @@ export default function VideoMeetComponent() {
         const endTime = new Date();
         const formatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
         
-        try {
-            // --- DEBUG LOG ---
-            console.log("ATTEMPTING TO SAVE HISTORY...");
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                // --- DEBUG LOG ---
+                console.log("ATTEMPTING TO SAVE HISTORY...");
 
-            const response = await axios.post(`${server_url}/api/v1/users/add_to_activity`, {
-                token: localStorage.getItem("token"),
-                meeting_code: window.location.pathname.split('/').pop(),
-                startTime: formatter.format(startTimeRef.current),
-                endTime: formatter.format(endTime)
-            });
+                const response = await axios.post(`${server_url}/api/v1/users/add_to_activity`, {
+                    meeting_code: window.location.pathname.split('/').pop(),
+                    startTime: formatter.format(startTimeRef.current),
+                    endTime: formatter.format(endTime)
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
 
-            // --- SUCCESS CONFIRMATION ---
-            console.log("HISTORY SAVED! Server Responded:", response.data);
-            // alert("Meeting saved to History!"); // Uncomment if you want a popup verification
+                // --- SUCCESS CONFIRMATION ---
+                console.log("HISTORY SAVED! Server Responded:", response.data);
+                // alert("Meeting saved to History!"); // Uncomment if you want a popup verification
 
-        } catch (e) {
-            console.error("Error saving history:", e);
-            alert("Failed to save history: " + e.message);
+            } catch (e) {
+                console.error("Error saving history:", e);
+                alert("Failed to save history: " + e.message);
+            }
+        } else {
+            console.log("No token found. Skipping history save for guest session.");
         }
 
         try { 
@@ -358,16 +423,28 @@ export default function VideoMeetComponent() {
         socketRef.current.on('video-toggle', (fromId, isEnabled) => setVideos(prev => prev.map(v => v.socketId === fromId ? { ...v, videoEnabled: isEnabled } : v)));
         socketRef.current.on('audio-toggle', (fromId, isEnabled) => setVideos(prev => prev.map(v => v.socketId === fromId ? { ...v, audioEnabled: isEnabled } : v)));
         socketRef.current.on('chat-message', addMessage);
-        socketRef.current.on('user-left', (id) => setVideos(prev => prev.filter(v => v.socketId !== id)));
+        socketRef.current.on('user-left', (id) => {
+            setVideos(prev => prev.filter(v => v.socketId !== id));
+            if (connectionsRef.current[id]) {
+                connectionsRef.current[id].close();
+                delete connectionsRef.current[id];
+            }
+            if (pendingICEQueue.current[id]) {
+                delete pendingICEQueue.current[id];
+            }
+        });
 
         socketRef.current.on('user-joined', (id, clients) => {
             clients.forEach((socketListId) => {
-                connections[socketListId] = new RTCPeerConnection(peerConfigConnections);
-                window.localStream.getTracks().forEach(track => connections[socketListId].addTrack(track, window.localStream));
-                connections[socketListId].onicecandidate = (event) => {
+                if (socketListId === socketIdRef.current) return;
+                if (connectionsRef.current[socketListId]) return;
+
+                connectionsRef.current[socketListId] = new RTCPeerConnection(peerConfigConnections);
+                window.localStream.getTracks().forEach(track => connectionsRef.current[socketListId].addTrack(track, window.localStream));
+                connectionsRef.current[socketListId].onicecandidate = (event) => {
                     if (event.candidate != null) socketRef.current.emit('signal', socketListId, JSON.stringify({ 'ice': event.candidate }));
                 }
-                connections[socketListId].ontrack = (event) => {
+                connectionsRef.current[socketListId].ontrack = (event) => {
                     const stream = event.streams[0];
                     setVideos(prev => {
                         const exists = prev.find(v => v.socketId === socketListId);
@@ -383,11 +460,10 @@ export default function VideoMeetComponent() {
                 };
 
                 if (id === socketIdRef.current) {
-                    if (socketListId === socketIdRef.current) return;
-                    connections[socketListId].createOffer().then((description) => {
-                        connections[socketListId].setLocalDescription(description).then(() => {
+                    connectionsRef.current[socketListId].createOffer().then((description) => {
+                        connectionsRef.current[socketListId].setLocalDescription(description).then(() => {
                             socketRef.current.emit('signal', socketListId, JSON.stringify({ 
-                                'sdp': connections[socketListId].localDescription,
+                                'sdp': connectionsRef.current[socketListId].localDescription,
                                 'username': username,
                                 'videoEnabled': video,
                                 'audioEnabled': audio
@@ -403,19 +479,38 @@ export default function VideoMeetComponent() {
         const signal = JSON.parse(message);
         if (fromId === socketIdRef.current) return;
         if (signal.sdp) {
-            await connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp));
+            await connectionsRef.current[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp));
+            
+            if (pendingICEQueue.current[fromId]) {
+                while (pendingICEQueue.current[fromId].length > 0) {
+                    const candidate = pendingICEQueue.current[fromId].shift();
+                    await connectionsRef.current[fromId].addIceCandidate(candidate).catch(e => console.log(e));
+                }
+                delete pendingICEQueue.current[fromId];
+            }
+
             if (signal.sdp.type === 'offer') {
-                const description = await connections[fromId].createAnswer();
-                await connections[fromId].setLocalDescription(description);
+                const description = await connectionsRef.current[fromId].createAnswer();
+                await connectionsRef.current[fromId].setLocalDescription(description);
                 socketRef.current.emit('signal', fromId, JSON.stringify({ 
-                    'sdp': connections[fromId].localDescription,
+                    'sdp': connectionsRef.current[fromId].localDescription,
                     'username': username,
                     'videoEnabled': video,
                     'audioEnabled': audio
                 }));
             }
         }
-        if (signal.ice) await connections[fromId].addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e => console.log(e));
+        if (signal.ice) {
+            const candidate = new RTCIceCandidate(signal.ice);
+            if (connectionsRef.current[fromId] && connectionsRef.current[fromId].remoteDescription) {
+                await connectionsRef.current[fromId].addIceCandidate(candidate).catch(e => console.log(e));
+            } else {
+                if (!pendingICEQueue.current[fromId]) {
+                    pendingICEQueue.current[fromId] = [];
+                }
+                pendingICEQueue.current[fromId].push(candidate);
+            }
+        }
         if(signal.username) {
             usernameMapRef.current[fromId] = signal.username;
             setVideos(prev => prev.map(v => v.socketId === fromId ? { 
@@ -468,164 +563,174 @@ export default function VideoMeetComponent() {
                 </div>
             ) : (
                 <div className={styles.meetVideoContainer}>
-                    {/* Top Left Info */}
-                    <div className={styles.topLeftActions}>
-                        <IconButton onClick={() => setShowMeetingInfo(!showMeetingInfo)} style={{ color: 'white' }}>
-                            <InfoIcon />
-                        </IconButton>
-                    </div>
-
-                    {showMeetingInfo && (
-                        <div className={styles.meetingInfoCard}>
-                            <div className={styles.meetingInfoHeader}>
-                                <h3>Meeting Details</h3>
-                                <IconButton size="small" onClick={() => setShowMeetingInfo(false)} style={{color: 'white'}}><CloseIcon fontSize="small"/></IconButton>
-                            </div>
-                            <div className={styles.infoSection}>
-                                <span className={styles.infoLabel}>Joining Info</span>
-                                <div className={styles.linkBox}>
-                                    <span className={styles.linkText}>{window.location.href}</span>
-                                    <IconButton size="small" onClick={handleCopyLink} style={{color: '#EB5545'}}><ContentCopyIcon fontSize="small"/></IconButton>
-                                </div>
-                                {copySuccess && <p className={styles.copySuccess}>Link copied!</p>}
-                            </div>
+                    <div className={styles.mainStage}>
+                        {/* Top Left Info */}
+                        <div className={styles.topLeftActions}>
+                            <IconButton onClick={() => setShowMeetingInfo(!showMeetingInfo)} style={{ color: 'white' }}>
+                                <InfoIcon />
+                            </IconButton>
                         </div>
-                    )}
 
-                    {/* Participants List */}
-                    {showParticipants && (
-                        <div className={styles.sideBar}>
-                            <div className={styles.sideBarHeader}>
-                                <h3>Participants ({videos.length + 1})</h3>
-                                <IconButton size="small" onClick={() => setShowParticipants(false)} style={{color: 'white'}}><CloseIcon fontSize="small" /></IconButton>
-                            </div>
-                            <div style={{overflowY: 'auto', flex: 1}}>
-                                <div className={styles.participantItem}>
-                                    <div className={styles.participantInfo}>
-                                        <div className={styles.participantAvatar}>{username.charAt(0).toUpperCase()}</div>
-                                        <span>{username} (You)</span>
-                                    </div>
-                                    {!audio && <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />}
+                        {showMeetingInfo && (
+                            <div className={styles.meetingInfoCard}>
+                                <div className={styles.meetingInfoHeader}>
+                                    <h3>Meeting Details</h3>
+                                    <IconButton size="small" onClick={() => setShowMeetingInfo(false)} style={{color: 'white'}}><CloseIcon fontSize="small"/></IconButton>
                                 </div>
-                                {videos.map((v) => (
-                                    <div key={v.socketId} className={styles.participantItem}>
-                                        <div className={styles.participantInfo}>
-                                            <div className={styles.participantAvatar}>{v.username?.charAt(0).toUpperCase()}</div>
-                                            <span>{v.username}</span>
-                                        </div>
-                                        {v.audioEnabled === false && <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />}
+                                <div className={styles.infoSection}>
+                                    <span className={styles.infoLabel}>Joining Info</span>
+                                    <div className={styles.linkBox}>
+                                        <span className={styles.linkText}>{window.location.href}</span>
+                                        <IconButton size="small" onClick={handleCopyLink} style={{color: '#EB5545'}}><ContentCopyIcon fontSize="small"/></IconButton>
                                     </div>
-                                ))}
+                                    {copySuccess && <p className={styles.copySuccess}>Link copied!</p>}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Chat Sidebar */}
-                    {showModal && (
-                        <div className={styles.sideBar}>
-                            <div className={styles.sideBarHeader}>
-                                <h1>Chat Room</h1>
-                                <IconButton onClick={() => setModal(false)} style={{ color: "white" }}><CloseIcon /></IconButton>
-                            </div>
-                            <div className={styles.chattingDisplay}>
-                                {messages.map((item, index) => (
-                                    <div key={index} className={`${styles.chatBubble} ${item.sender === username ? styles.msgLocal : styles.msgRemote}`}>
-                                        <span className={styles.senderName}>{item.sender}</span>{item.data}
+                        {/* REMOTE VIDEOS GRID */}
+                        <div className={styles.conferenceView}>
+                            {videos.map((videoObj) => (
+                                <div key={videoObj.socketId} className={styles.remoteVideoContainer}>
+                                     <div className={styles.userInfoOverlay}>
+                                        <AccountCircleIcon fontSize="small" style={{color:'white'}} />
+                                        <span className={styles.usernameText}>{videoObj.username || "Participant"}</span> 
                                     </div>
-                                ))}
-                            </div>
-                            <div className={styles.chattingArea}>
-                                <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." variant="outlined" size="small" />
-                                <Button variant='contained' onClick={sendMessage} sx={{ backgroundColor: '#EB5545', minWidth: '80px' }}>Send</Button>
-                            </div>
-                        </div>
-                    )}
 
-                    {/* REMOTE VIDEOS GRID */}
-                    <div className={styles.conferenceView}>
-                        {videos.map((videoObj) => (
-                            <div key={videoObj.socketId} className={styles.remoteVideoContainer}>
-                                 <div className={styles.userInfoOverlay}>
-                                    <AccountCircleIcon fontSize="small" style={{color:'white'}} />
-                                    <span className={styles.usernameText}>{videoObj.username || "Participant"}</span> 
-                                </div>
-
-                                <div className={styles.micStatusOverlay}>
-                                    {videoObj.audioEnabled !== false ? 
-                                        <MicIcon fontSize="small" style={{color: 'white'}} /> : 
-                                        <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />
-                                    }
-                                </div>
-
-                                <video
-                                    className={styles.remoteVideo}
-                                    ref={ref => {
-                                        if (ref && videoObj.stream) {
-                                            if(ref.srcObject !== videoObj.stream) ref.srcObject = videoObj.stream;
+                                    <div className={styles.micStatusOverlay}>
+                                        {videoObj.audioEnabled !== false ? 
+                                            <MicIcon fontSize="small" style={{color: 'white'}} /> : 
+                                            <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />
                                         }
-                                    }}
-                                    autoPlay
-                                    playsInline
-                                    style={{ display: videoObj.videoEnabled !== false ? 'block' : 'none' }}
-                                >
-                                </video>
-                                
-                                <div className={styles.videoOffPlaceholder} style={{ display: videoObj.videoEnabled !== false ? 'none' : 'flex' }}>
-                                    <AccountCircleIcon className={styles.videoOffIcon} />
-                                    <p className={styles.videoOffText}>Camera Off</p>
+                                    </div>
+
+                                    <video
+                                        className={styles.remoteVideo}
+                                        ref={ref => {
+                                            if (ref && videoObj.stream) {
+                                                if(ref.srcObject !== videoObj.stream) ref.srcObject = videoObj.stream;
+                                            }
+                                        }}
+                                        autoPlay
+                                        playsInline
+                                        style={{ display: videoObj.videoEnabled !== false ? 'block' : 'none' }}
+                                    >
+                                    </video>
+                                    
+                                    <div className={styles.videoOffPlaceholder} style={{ display: videoObj.videoEnabled !== false ? 'none' : 'flex' }}>
+                                        <AccountCircleIcon className={styles.videoOffIcon} />
+                                        <p className={styles.videoOffText}>Camera Off</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* LOCAL VIDEO (PIP) */}
-                    <div className={styles.localVideoContainer}>
-                         <div className={styles.userInfoOverlay}>
-                            <span className={styles.usernameText}>{username} (You)</span>
-                        </div>
-                        
-                        <div className={styles.micStatusOverlay}>
-                            {audio ? <MicIcon fontSize="small" style={{color: 'white'}} /> : <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />}
+                            ))}
                         </div>
 
-                        <video className={styles.localVideo} ref={localVideoref} autoPlay muted style={{ display: video ? 'block' : 'none' }}></video>
-                        {!video && (
-                            <div className={styles.videoOffPlaceholder}>
-                                <AccountCircleIcon className={styles.videoOffIcon} />
+                        {/* LOCAL VIDEO (PIP) */}
+                        <div className={styles.localVideoContainer}>
+                             <div className={styles.userInfoOverlay}>
+                                <span className={styles.usernameText}>{username} (You)</span>
                             </div>
-                        )}
+                            
+                            <div className={styles.micStatusOverlay}>
+                                {audio ? <MicIcon fontSize="small" style={{color: 'white'}} /> : <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />}
+                            </div>
+
+                            <video className={styles.localVideo} ref={localVideoref} autoPlay muted style={{ display: video ? 'block' : 'none' }}></video>
+                            {!video && (
+                                <div className={styles.videoOffPlaceholder}>
+                                    <AccountCircleIcon className={styles.videoOffIcon} />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* CONTROLS */}
+                        <div className={styles.meetingInfoContainer}>
+                            <span className={styles.timeText}>{formatTime(currentTime)}</span>
+                            <span className={styles.meetingCodeText}>{window.location.pathname.split('/').pop() || "MEETING"}</span>
+                        </div>
+
+                        <div className={styles.buttonContainers}>
+                            <IconButton onClick={() => updateMediaTrack('video')} className={video ? styles.iconBlockActive : styles.iconBlock}>
+                                {video ? <VideocamIcon /> : <VideocamOffIcon />}
+                            </IconButton>
+                            <IconButton onClick={() => updateMediaTrack('audio')} className={audio ? styles.iconBlockActive : styles.iconBlock}>
+                                {audio ? <MicIcon /> : <MicOffIcon />}
+                            </IconButton>
+                            {screenAvailable && (
+                                <IconButton onClick={handleScreen} className={screen ? styles.iconBlock : styles.iconBlockActive}>
+                                    {screen ? <ScreenShareIcon /> : <StopScreenShareIcon />}
+                                </IconButton>
+                            )}
+                            <Badge badgeContent={newMessages} color="error">
+                                <IconButton onClick={toggleChat} className={styles.iconBlock}>
+                                    <ChatIcon />
+                                </IconButton>
+                            </Badge>
+                            <IconButton onClick={toggleParticipants} className={styles.iconBlock}>
+                                <PeopleIcon />
+                            </IconButton>
+                            <IconButton onClick={handleEndCall} className={styles.iconBlockEnd}>
+                                <CallEndIcon />
+                            </IconButton>
+                        </div>
                     </div>
 
-                    {/* CONTROLS */}
-                    <div className={styles.meetingInfoContainer}>
-                        <span className={styles.timeText}>{formatTime(currentTime)}</span>
-                        <span className={styles.meetingCodeText}>{window.location.pathname.split('/').pop() || "MEETING"}</span>
-                    </div>
+                    {/* RESIZER & SIDEBAR CONTAINER */}
+                    {(showParticipants || showModal) && (
+                        <>
+                            <div className={styles.resizer} onMouseDown={handleMouseDown} />
+                            <div className={styles.sideBarContainer} style={{ width: `${sidebarWidth}px` }}>
+                                {/* Participants List */}
+                                {showParticipants && (
+                                    <div className={styles.sideBar}>
+                                        <div className={styles.sideBarHeader}>
+                                            <h3>Participants ({videos.length + 1})</h3>
+                                            <IconButton size="small" onClick={() => setShowParticipants(false)} style={{color: 'white'}}><CloseIcon fontSize="small" /></IconButton>
+                                        </div>
+                                        <div style={{overflowY: 'auto', flex: 1}}>
+                                            <div className={styles.participantItem}>
+                                                <div className={styles.participantInfo}>
+                                                    <div className={styles.participantAvatar}>{username.charAt(0).toUpperCase()}</div>
+                                                    <span>{username} (You)</span>
+                                                </div>
+                                                {!audio && <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />}
+                                            </div>
+                                            {videos.map((v) => (
+                                                <div key={v.socketId} className={styles.participantItem}>
+                                                    <div className={styles.participantInfo}>
+                                                        <div className={styles.participantAvatar}>{v.username?.charAt(0).toUpperCase()}</div>
+                                                        <span>{v.username}</span>
+                                                    </div>
+                                                    {v.audioEnabled === false && <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
-                    <div className={styles.buttonContainers}>
-                        <IconButton onClick={() => updateMediaTrack('video')} className={video ? styles.iconBlockActive : styles.iconBlock}>
-                            {video ? <VideocamIcon /> : <VideocamOffIcon />}
-                        </IconButton>
-                        <IconButton onClick={() => updateMediaTrack('audio')} className={audio ? styles.iconBlockActive : styles.iconBlock}>
-                            {audio ? <MicIcon /> : <MicOffIcon />}
-                        </IconButton>
-                        {screenAvailable && (
-                            <IconButton onClick={handleScreen} className={screen ? styles.iconBlock : styles.iconBlockActive}>
-                                {screen ? <ScreenShareIcon /> : <StopScreenShareIcon />}
-                            </IconButton>
-                        )}
-                        <Badge badgeContent={newMessages} color="error">
-                            <IconButton onClick={toggleChat} className={styles.iconBlock}>
-                                <ChatIcon />
-                            </IconButton>
-                        </Badge>
-                        <IconButton onClick={toggleParticipants} className={styles.iconBlock}>
-                            <PeopleIcon />
-                        </IconButton>
-                        <IconButton onClick={handleEndCall} className={styles.iconBlockEnd}>
-                            <CallEndIcon />
-                        </IconButton>
-                    </div>
+                                {/* Chat Sidebar */}
+                                {showModal && (
+                                    <div className={styles.sideBar}>
+                                        <div className={styles.sideBarHeader}>
+                                            <h1>Chat Room</h1>
+                                            <IconButton onClick={() => setModal(false)} style={{ color: "white" }}><CloseIcon /></IconButton>
+                                        </div>
+                                        <div className={styles.chattingDisplay}>
+                                            {messages.map((item, index) => (
+                                                <div key={index} className={`${styles.chatBubble} ${item.sender === username ? styles.msgLocal : styles.msgRemote}`}>
+                                                    <span className={styles.senderName}>{item.sender}</span>{item.data}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className={styles.chattingArea}>
+                                            <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." variant="outlined" size="small" />
+                                            <Button variant='contained' onClick={sendMessage} sx={{ backgroundColor: '#EB5545', minWidth: '80px' }}>Send</Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
         </div>

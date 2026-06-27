@@ -55,6 +55,11 @@ export const connectToSocket = (server) => {
         })
 
         socket.on("disconnect", () => {
+            console.log("=== BEFORE CLEANUP ===");
+            console.log("Connections keys:", Object.keys(connections));
+            console.log("Messages keys:", Object.keys(messages));
+            console.log("TimeOnline keys count:", Object.keys(timeOnline).length);
+
             var diffTime = Math.abs(timeOnline[socket.id] - new Date())
             var key
             for (const [k, v] of JSON.parse(JSON.stringify(Object.entries(connections)))) {
@@ -66,10 +71,20 @@ export const connectToSocket = (server) => {
                         }
                         var index = connections[key].indexOf(socket.id)
                         connections[key].splice(index, 1)
-                        if (connections[key].length === 0) delete connections[key]
+                        if (connections[key].length === 0) {
+                            delete connections[key];
+                            delete messages[key];
+                        }
                     }
                 }
             }
+
+            delete timeOnline[socket.id];
+
+            console.log("=== AFTER CLEANUP ===");
+            console.log("Connections keys:", Object.keys(connections));
+            console.log("Messages keys:", Object.keys(messages));
+            console.log("TimeOnline keys count:", Object.keys(timeOnline).length);
         })
 
         // --- SYNC HANDLERS (Video & Audio Only) ---
