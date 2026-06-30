@@ -6,6 +6,7 @@ import { createServer } from "http";
 import mongoose from "mongoose";
 import { connectToSocket } from "./controllers/socketManager.js";
 import userRoutes from "./routes/users.route.js";
+import meetingRoutes from "./routes/meeting.route.js";
 import dotenv from "dotenv"; 
 
 // Load environment variables
@@ -38,6 +39,7 @@ app.use(express.static(buildPath));
 
 // 2. API Routes
 app.use("/api/v1/users", userRoutes);
+app.use("/api/meeting", meetingRoutes);
 
 // 3. Handle React Routing (Wildcard)
 app.get(/.*/, (req, res) => {
