@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import io from "socket.io-client";
-import { Badge, IconButton, TextField, Button } from '@mui/material';
+import { Badge, IconButton, TextField, Button, Tabs, Tab, Box } from '@mui/material';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff'
 import styles from "../styles/videoComponent.module.css";
@@ -15,6 +15,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'; 
 import InfoIcon from '@mui/icons-material/Info';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ClosedCaptionIcon from '@mui/icons-material/ClosedCaption';
 import server from '../environment';
 import axios from 'axios'; 
 import { AuthContext } from '../contexts/AuthContext';
@@ -59,6 +60,10 @@ export default function VideoMeetComponent() {
     let [copySuccess, setCopySuccess] = useState(false);
     let [screenAvailable, setScreenAvailable] = useState(false);
 
+    const [transcripts, setTranscripts] = useState([]);
+    const [showTranscript, setShowTranscript] = useState(false);
+    const transcriptEndRef = useRef(null);
+
     const startTimeRef = useRef(new Date()); 
 
     const [videos, setVideos] = useState([]);
@@ -96,6 +101,83 @@ export default function VideoMeetComponent() {
             pendingICEQueue.current = {};
         };
     }, [])
+
+    // Auto-scroll transcripts
+    useEffect(() => {
+        if (transcriptEndRef.current) {
+            transcriptEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [transcripts]);
+
+    // Web Speech API client transcription
+    useEffect(() => {
+        if (askForUsername) return;
+        if (!audio) return; // Only transcribe when unmuted
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            console.warn("Web Speech API is not supported in this browser.");
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event) => {
+            if (!audio) return;
+            
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    const speechText = event.results[i][0].transcript.trim();
+                    if (speechText) {
+                        const timestamp = new Date();
+                        const segment = {
+                            speaker: username || "Me",
+                            text: speechText,
+                            timestamp: timestamp
+                        };
+                        
+                        if (socketRef.current) {
+                            socketRef.current.emit('new-transcript-segment', segment);
+                        }
+                        
+                        setTranscripts(prev => [...prev, segment]);
+                    }
+                }
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+        };
+
+        recognition.onend = () => {
+            if (!askForUsername && audio) {
+                try {
+                    recognition.start();
+                } catch (err) {
+                    console.error("Failed to restart speech recognition:", err);
+                }
+            }
+        };
+
+        try {
+            recognition.start();
+        } catch (err) {
+            console.error("Speech recognition start error:", err);
+        }
+
+        return () => {
+            recognition.onend = null;
+            try {
+                recognition.stop();
+            } catch (err) {
+                console.error("Failed to stop speech recognition:", err);
+            }
+        };
+    }, [askForUsername, username, audio]);
 
     useEffect(() => {
         if (!isDragging) return;
@@ -416,13 +498,17 @@ export default function VideoMeetComponent() {
         socketRef.current = io.connect(server_url, { secure: false });
         socketRef.current.on('connect', () => {
             socketIdRef.current = socketRef.current.id;
-            socketRef.current.emit('join-call', window.location.href);
+            const token = localStorage.getItem("token");
+            socketRef.current.emit('join-call', window.location.href, token);
         });
 
         socketRef.current.on('signal', handleSignal);
         socketRef.current.on('video-toggle', (fromId, isEnabled) => setVideos(prev => prev.map(v => v.socketId === fromId ? { ...v, videoEnabled: isEnabled } : v)));
         socketRef.current.on('audio-toggle', (fromId, isEnabled) => setVideos(prev => prev.map(v => v.socketId === fromId ? { ...v, audioEnabled: isEnabled } : v)));
         socketRef.current.on('chat-message', addMessage);
+        socketRef.current.on('new-transcript-segment', (segment) => {
+            setTranscripts(prev => [...prev, segment]);
+        });
         socketRef.current.on('user-left', (id) => {
             setVideos(prev => prev.filter(v => v.socketId !== id));
             if (connectionsRef.current[id]) {
@@ -528,8 +614,9 @@ export default function VideoMeetComponent() {
     };
     const sendMessage = () => { socketRef.current.emit('chat-message', message, username); setMessage(""); }
     const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const toggleChat = () => { setModal(!showModal); setShowParticipants(false); setNewMessages(0); }
-    const toggleParticipants = () => { setShowParticipants(!showParticipants); setModal(false); }
+    const toggleChat = () => { setModal(!showModal); setShowParticipants(false); setShowTranscript(false); setNewMessages(0); }
+    const toggleParticipants = () => { setShowParticipants(!showParticipants); setModal(false); setShowTranscript(false); }
+    const toggleTranscript = () => { setShowTranscript(!showTranscript); setModal(false); setShowParticipants(false); }
     const handleCopyLink = () => { navigator.clipboard.writeText(window.location.href); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000); }
 
     return (
@@ -669,6 +756,9 @@ export default function VideoMeetComponent() {
                             <IconButton onClick={toggleParticipants} className={styles.iconBlock}>
                                 <PeopleIcon />
                             </IconButton>
+                            <IconButton onClick={toggleTranscript} className={showTranscript ? styles.iconBlockActive : styles.iconBlock}>
+                                <ClosedCaptionIcon />
+                            </IconButton>
                             <IconButton onClick={handleEndCall} className={styles.iconBlockEnd}>
                                 <CallEndIcon />
                             </IconButton>
@@ -676,10 +766,37 @@ export default function VideoMeetComponent() {
                     </div>
 
                     {/* RESIZER & SIDEBAR CONTAINER */}
-                    {(showParticipants || showModal) && (
+                    {(showParticipants || showModal || showTranscript) && (
                         <>
                             <div className={styles.resizer} onMouseDown={handleMouseDown} />
                             <div className={styles.sideBarContainer} style={{ width: `${sidebarWidth}px` }}>
+                                <Box sx={{ borderBottom: 1, borderColor: 'rgba(255, 255, 255, 0.1)', padding: '5px' }}>
+                                    <Tabs
+                                        value={showModal ? 0 : showParticipants ? 1 : 2}
+                                        onChange={(e, val) => {
+                                            if (val === 0) {
+                                                setModal(true); setShowParticipants(false); setShowTranscript(false); setNewMessages(0);
+                                            } else if (val === 1) {
+                                                setModal(false); setShowParticipants(true); setShowTranscript(false);
+                                            } else {
+                                                setModal(false); setShowParticipants(false); setShowTranscript(true);
+                                            }
+                                        }}
+                                        textColor="inherit"
+                                        indicatorColor="primary"
+                                        variant="fullWidth"
+                                        sx={{
+                                            '& .MuiTab-root': { color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem', textTransform: 'none', minHeight: '40px' },
+                                            '& .Mui-selected': { color: '#EB5545 !important', fontWeight: 'bold' },
+                                            '& .MuiTabs-indicator': { backgroundColor: '#EB5545' }
+                                        }}
+                                    >
+                                        <Tab label={`Chat${newMessages > 0 ? ` (${newMessages})` : ''}`} />
+                                        <Tab label="Participants" />
+                                        <Tab label="Transcript" />
+                                    </Tabs>
+                                </Box>
+
                                 {/* Participants List */}
                                 {showParticipants && (
                                     <div className={styles.sideBar}>
@@ -725,6 +842,38 @@ export default function VideoMeetComponent() {
                                         <div className={styles.chattingArea}>
                                             <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." variant="outlined" size="small" />
                                             <Button variant='contained' onClick={sendMessage} sx={{ backgroundColor: '#EB5545', minWidth: '80px' }}>Send</Button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Transcript Panel */}
+                                {showTranscript && (
+                                    <div className={styles.sideBar}>
+                                        <div className={styles.sideBarHeader}>
+                                            <h3>Live Transcript</h3>
+                                            <IconButton size="small" onClick={() => setShowTranscript(false)} style={{color: 'white'}}><CloseIcon fontSize="small" /></IconButton>
+                                        </div>
+                                        <div style={{ overflowY: 'auto', flex: 1, padding: '15px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                            {transcripts.length === 0 ? (
+                                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', textAlign: 'center', padding: '20px' }}>
+                                                    No transcript segments yet. Start speaking to see text here.
+                                                </div>
+                                            ) : (
+                                                transcripts.map((t, index) => (
+                                                    <div key={index} style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: '10px 14px', borderRadius: '12px', borderLeft: '3px solid #EB5545' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                                            <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#EB5545', textTransform: 'capitalize' }}>
+                                                                {t.speaker}
+                                                            </span>
+                                                            <span style={{ fontSize: '0.65rem', color: 'rgba(255, 255, 255, 0.5)', marginLeft: 'auto' }}>
+                                                                {t.timestamp ? new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                            </span>
+                                                        </div>
+                                                        <p style={{ margin: 0, fontSize: '0.85rem', color: 'white', lineHeight: '1.4', wordBreak: 'break-word' }}>{t.text}</p>
+                                                    </div>
+                                                ))
+                                            )}
+                                            <div ref={transcriptEndRef} />
                                         </div>
                                     </div>
                                 )}

@@ -1,8 +1,14 @@
 import { Server } from "socket.io"
+import { MeetingSession } from "../models/meeting.model.js"
+import jwt from "jsonwebtoken"
 
 let connections = {}
 let messages = {}
 let timeOnline = {}
+let transcripts = {}
+let roomStartTime = {}
+let socketToUser = {}
+let roomUsers = {}
 
 export const connectToSocket = (server) => {
     const io = new Server(server, {
@@ -15,12 +21,31 @@ export const connectToSocket = (server) => {
     });
 
     io.on("connection", (socket) => {
-        socket.on("join-call", (path) => {
+        socket.on("join-call", (path, token) => {
             if (connections[path] === undefined) {
                 connections[path] = []
+                roomStartTime[path] = new Date();
+                transcripts[path] = [];
             }
             connections[path].push(socket.id)
             timeOnline[socket.id] = new Date();
+
+            if (token) {
+                try {
+                    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret");
+                    if (decoded && decoded.id) {
+                        socketToUser[socket.id] = decoded.id;
+                        if (roomUsers[path] === undefined) {
+                            roomUsers[path] = [];
+                        }
+                        if (!roomUsers[path].includes(decoded.id)) {
+                            roomUsers[path].push(decoded.id);
+                        }
+                    }
+                } catch (err) {
+                    console.error("Token verification failed in socket connection:", err.message);
+                }
+            }
 
             for (let a = 0; a < connections[path].length; a++) {
                 io.to(connections[path][a]).emit("user-joined", socket.id, connections[path])
@@ -54,6 +79,31 @@ export const connectToSocket = (server) => {
             }
         })
 
+        socket.on("new-transcript-segment", (data) => {
+            const [matchingRoom, found] = Object.entries(connections)
+                .reduce(([room, isFound], [roomKey, roomValue]) => {
+                    if (!isFound && roomValue.includes(socket.id)) return [roomKey, true];
+                    return [room, isFound];
+                }, ['', false]);
+
+            if (found === true) {
+                if (transcripts[matchingRoom] === undefined) {
+                    transcripts[matchingRoom] = [];
+                }
+                transcripts[matchingRoom].push({
+                    speaker: data.speaker,
+                    text: data.text,
+                    timestamp: data.timestamp || new Date()
+                });
+
+                connections[matchingRoom].forEach((elem) => {
+                    if (elem !== socket.id) {
+                        io.to(elem).emit("new-transcript-segment", data);
+                    }
+                });
+            }
+        })
+
         socket.on("disconnect", () => {
             console.log("=== BEFORE CLEANUP ===");
             console.log("Connections keys:", Object.keys(connections));
@@ -72,13 +122,49 @@ export const connectToSocket = (server) => {
                         var index = connections[key].indexOf(socket.id)
                         connections[key].splice(index, 1)
                         if (connections[key].length === 0) {
+                            const roomTranscripts = transcripts[key] || [];
+                            const startTime = roomStartTime[key] || new Date();
+                            const endTime = new Date();
+                            const meetingCode = key.split('/').pop() || "MEETING";
+                            const roomUserList = roomUsers[key] || [];
+                            const userId = roomUserList[0] || socketToUser[socket.id];
+
                             delete connections[key];
                             delete messages[key];
+                            delete transcripts[key];
+                            delete roomStartTime[key];
+                            delete roomUsers[key];
+
+                            if (userId) {
+                                (async () => {
+                                    try {
+                                        const formatTime = (date) => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                                        const newSession = new MeetingSession({
+                                            userId,
+                                            meetingCode,
+                                            startTime: formatTime(startTime),
+                                            endTime: formatTime(endTime),
+                                            date: startTime,
+                                            transcript: roomTranscripts,
+                                            aiSummary: [],
+                                            actionItems: [],
+                                            decisions: []
+                                        });
+                                        await newSession.save();
+                                        console.log("MeetingSession successfully saved to database on room close.");
+                                    } catch (dbErr) {
+                                        console.error("Failed to save MeetingSession to database on room close:", dbErr);
+                                    }
+                                })();
+                            } else {
+                                console.warn("Could not save MeetingSession because no authenticated userId was associated with this room.");
+                            }
                         }
                     }
                 }
             }
 
+            delete socketToUser[socket.id];
             delete timeOnline[socket.id];
 
             console.log("=== AFTER CLEANUP ===");
