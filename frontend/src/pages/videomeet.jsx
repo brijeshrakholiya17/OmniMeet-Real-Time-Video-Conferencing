@@ -86,6 +86,36 @@ export default function VideoMeetComponent() {
     const handleMoreClick = (event) => setMoreAnchorEl(event.currentTarget);
     const handleMoreClose = () => setMoreAnchorEl(null);
 
+    const [isHost, setIsHost] = useState(false);
+    const [endCallAnchorEl, setEndCallAnchorEl] = useState(null);
+    const audioRef = useRef(audio);
+
+    useEffect(() => {
+        audioRef.current = audio;
+    }, [audio]);
+
+    const handleEndCallClick = (event) => {
+        if (!isHost) {
+            handleEndCall();
+        } else {
+            setEndCallAnchorEl(event.currentTarget);
+        }
+    };
+    const handleEndCallClose = () => {
+        setEndCallAnchorEl(null);
+    };
+    const handleLeaveMeeting = () => {
+        handleEndCallClose();
+        handleEndCall();
+    };
+    const handleEndMeetingForAll = () => {
+        handleEndCallClose();
+        if (socketRef.current) {
+            socketRef.current.emit("end-meeting-for-all");
+        }
+        handleEndCall();
+    };
+
     useEffect(() => {
         if (navigator.mediaDevices.getDisplayMedia) {
             setScreenAvailable(true);
@@ -140,6 +170,7 @@ export default function VideoMeetComponent() {
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1;
 
         recognition.onresult = (event) => {
             if (!audio) return;
@@ -170,7 +201,7 @@ export default function VideoMeetComponent() {
         };
 
         recognition.onend = () => {
-            if (!askForUsername && audio) {
+            if (!askForUsername && audioRef.current) {
                 try {
                     recognition.start();
                 } catch (err) {
@@ -533,6 +564,12 @@ export default function VideoMeetComponent() {
         });
         socketRef.current.on('whiteboard-clear', () => {
             whiteboardHistoryRef.current = [];
+        });
+        socketRef.current.on('you-are-host', (isHostFlag) => {
+            setIsHost(isHostFlag);
+        });
+        socketRef.current.on('meeting-terminated', () => {
+            handleEndCall();
         });
         socketRef.current.on('user-left', (id) => {
             setVideos(prev => prev.filter(v => v.socketId !== id));
@@ -921,9 +958,36 @@ export default function VideoMeetComponent() {
                             )}
 
                             {/* End Call */}
-                            <IconButton onClick={handleEndCall} className={styles.iconBlockEnd}>
+                            <IconButton onClick={handleEndCallClick} className={styles.iconBlockEnd}>
                                 <CallEndIcon />
                             </IconButton>
+
+                            {isHost && (
+                                <Menu
+                                    anchorEl={endCallAnchorEl}
+                                    open={Boolean(endCallAnchorEl)}
+                                    onClose={handleEndCallClose}
+                                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                                    transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                                    sx={{
+                                        '& .MuiPaper-root': {
+                                            backgroundColor: 'rgba(28, 28, 30, 0.98)',
+                                            backdropFilter: 'blur(10px)',
+                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            color: 'white',
+                                            borderRadius: '12px',
+                                            minWidth: '180px'
+                                        }
+                                    }}
+                                >
+                                    <MenuItem onClick={handleLeaveMeeting} sx={{ gap: 1.5 }}>
+                                        <Typography variant="body2">Leave Meeting</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={handleEndMeetingForAll} sx={{ gap: 1.5, color: '#EB5545' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>End Meeting for All</Typography>
+                                    </MenuItem>
+                                </Menu>
+                            )}
                         </Box>
                     </div>
 
@@ -1002,7 +1066,7 @@ export default function VideoMeetComponent() {
                                             ))}
                                         </div>
                                         <div className={styles.chattingArea}>
-                                            <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." variant="outlined" size="small" />
+                                            <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }} placeholder="Type a message..." variant="outlined" size="small" />
                                             <Button variant='contained' onClick={sendMessage} sx={{ backgroundColor: '#EB5545', minWidth: '80px' }}>Send</Button>
                                         </div>
                                     </div>

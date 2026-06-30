@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom'; 
 import '../styles/AuthStyles.css'; 
 import { AuthContext } from '../contexts/AuthContext';
-import { Snackbar, Alert, IconButton, Box, TextField, Button, Typography } from '@mui/material'; 
+import { Snackbar, Alert, IconButton, Box, TextField, Button, Typography, CircularProgress } from '@mui/material'; 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; 
 
 export default function Authentication() {
@@ -21,6 +21,7 @@ export default function Authentication() {
     const [formState, setFormState] = useState(location.state?.formState || 0); 
     
     const [open, setOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (location.state?.formState !== undefined) {
@@ -28,7 +29,29 @@ export default function Authentication() {
         }
     }, [location.state]);
 
-    const handleAuth = async () => {
+    const handleAuth = async (e) => {
+        if (e) e.preventDefault();
+        setError("");
+
+        if (!username.trim()) {
+            setError("Username is required");
+            return;
+        }
+        if (username.length > 20) {
+            setError("Username must be at most 20 characters");
+            return;
+        }
+        if (!password) {
+            setError("Password is required");
+            return;
+        }
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            setError("Password must contain at least one letter, one number, and one special character (minimum 8 characters)");
+            return;
+        }
+
+        setIsLoading(true);
         try {
             if (formState === 0) {
                 await handleLogin(username, password); 
@@ -53,6 +76,8 @@ export default function Authentication() {
             console.error(err);
             let errMsg = err?.response?.data?.message || "Something went wrong";
             setError(errMsg);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -101,7 +126,7 @@ export default function Authentication() {
                     </Button>
                 </Box>
 
-                <form noValidate onSubmit={(e) => e.preventDefault()}>
+                <form onSubmit={handleAuth} noValidate>
                     
                     {formState === 1 && (
                         <TextField
@@ -218,7 +243,8 @@ export default function Authentication() {
                     )}
 
                     <Button
-                        onClick={handleAuth}
+                        type="submit"
+                        disabled={isLoading}
                         variant="contained"
                         sx={{
                             backgroundColor: '#EB5545',
@@ -238,7 +264,7 @@ export default function Authentication() {
                             },
                         }}
                     >
-                        {formState === 0 ? "Login" : "Register"}
+                        {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : (formState === 0 ? "Login" : "Register")}
                     </Button>
                 </form>
             </Box>
