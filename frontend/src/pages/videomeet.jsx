@@ -150,7 +150,17 @@ export default function VideoMeetComponent() {
         };
 
         recognition.onerror = (event) => {
-            console.error("Speech recognition error:", event.error);
+            if (event.error === 'no-speech' || event.error === 'network' || event.error === 'audio-capture') {
+                // Do not log this as a critical error. 
+                // Mobile browsers throw 'no-speech' aggressively during silence.
+                setTimeout(() => {
+                    try { 
+                        if (audioRef.current) recognition.start(); 
+                    } catch(e) {}
+                }, 300); // Quick restart to keep the engine alive
+            } else {
+                console.error("Speech recognition error:", event.error);
+            }
         };
 
         recognition.onend = () => {
@@ -158,7 +168,7 @@ export default function VideoMeetComponent() {
                 try {
                     recognition.start();
                 } catch (err) {
-                    console.error("Failed to restart speech recognition:", err);
+                    // Fail silently to keep transcription running without console noise
                 }
             }
         };
@@ -441,17 +451,15 @@ export default function VideoMeetComponent() {
                     endTime: formatter.format(endTime)
                 }, {
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
                     }
                 });
 
                 // --- SUCCESS CONFIRMATION ---
                 console.log("HISTORY SAVED! Server Responded:", response.data);
-                // alert("Meeting saved to History!"); // Uncomment if you want a popup verification
 
             } catch (e) {
                 console.error("Error saving history:", e);
-                alert("Failed to save history: " + e.message);
             }
         } else {
             console.log("No token found. Skipping history save for guest session.");
