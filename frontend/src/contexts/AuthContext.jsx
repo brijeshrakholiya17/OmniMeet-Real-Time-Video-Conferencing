@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
         try {
             let request = await client.get("/get_all_activity", {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
             });
             return request.data;
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         try {
             let request = await axios.get(`${server}/api/meeting`, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
             });
             return request.data;
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
                 meeting_code: meetingCode
             }, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
             });
             return request;

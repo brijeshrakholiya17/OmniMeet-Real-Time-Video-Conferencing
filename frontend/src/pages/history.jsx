@@ -35,6 +35,15 @@ export default function History() {
     const routeTo = useNavigate();
 
     const fetchHistory = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setError("No token found. Please log in to view your meeting history.");
+            setOpen(true);
+            setTimeout(() => {
+                routeTo("/auth");
+            }, 2000);
+            return;
+        }
         try {
             const data = await getMeetingSessions();
             if (Array.isArray(data)) {
@@ -43,9 +52,17 @@ export default function History() {
                 console.error("Invalid history format:", data);
             }
         } catch (err) {
-            console.error(err);
-            setError("Failed to fetch meeting history");
-            setOpen(true);
+            console.error("Error fetching history:", err);
+            if (err.response && err.response.status === 401) {
+                setError("Session expired or invalid token. Please log in again.");
+                setOpen(true);
+                setTimeout(() => {
+                    routeTo("/auth");
+                }, 2000);
+            } else {
+                setError("Failed to fetch meeting history");
+                setOpen(true);
+            }
         }
     }
 
