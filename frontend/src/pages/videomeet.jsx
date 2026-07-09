@@ -1161,7 +1161,6 @@ export default function VideoMeetComponent() {
                             )}
                         </Box>
                     </div>
-                </div>
 
                     {/* RESIZER & SIDEBAR CONTAINER */}
             {(showParticipants || showModal || showTranscript) && (
@@ -1281,9 +1280,8 @@ export default function VideoMeetComponent() {
                     </div>
                 </>
             )}
+                </div>
+            )}
         </div>
-    )
-}
-        </div >
     )
 }
