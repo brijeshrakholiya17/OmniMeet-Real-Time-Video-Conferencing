@@ -11,6 +11,9 @@ export let transcripts = {}
 let roomStartTime = {}
 let socketToUser = {}
 let roomUsers = {}
+let whiteboardHistory = {}
+let roomHosts = {}
+let roomHostDbId = {}
 
 export const connectToSocket = (server) => {
     const io = new Server(server, {
@@ -28,13 +31,21 @@ export const connectToSocket = (server) => {
             if (clientUsername) {
                 socket.username = clientUsername;
             }
+        socket.on("join-call", (path, token) => {
+            socket.join(path);
             if (connections[path] === undefined) {
                 connections[path] = []
                 roomStartTime[path] = new Date();
                 transcripts[path] = [];
+                whiteboardHistory[path] = [];
+                roomHosts[path] = socket.id;
             }
             connections[path].push(socket.id)
             timeOnline[socket.id] = new Date();
+
+            if (roomHosts[path] === socket.id) {
+                socket.emit("you-are-host", true);
+            }
 
             if (token) {
                 try {
@@ -46,6 +57,9 @@ export const connectToSocket = (server) => {
                         }
                         if (!roomUsers[path].includes(decoded.id)) {
                             roomUsers[path].push(decoded.id);
+                        }
+                        if (roomHosts[path] === socket.id) {
+                            roomHostDbId[path] = decoded.id;
                         }
                     }
                 } catch (err) {
@@ -62,6 +76,10 @@ export const connectToSocket = (server) => {
                     io.to(socket.id).emit("chat-message", messages[path][a]['data'],
                         messages[path][a]['sender'], messages[path][a]['socket-id-sender'])
                 }
+            }
+
+            if (whiteboardHistory[path] !== undefined) {
+                io.to(socket.id).emit("whiteboard-state", whiteboardHistory[path]);
             }
         })
 
@@ -110,6 +128,22 @@ export const connectToSocket = (server) => {
             }
         })
 
+        socket.on("end-meeting-for-all", () => {
+            const [matchingRoom, found] = Object.entries(connections)
+                .reduce(([room, isFound], [roomKey, roomValue]) => {
+                    if (!isFound && roomValue.includes(socket.id)) return [roomKey, true];
+                    return [room, isFound];
+                }, ['', false]);
+
+            if (found === true) {
+                if (roomHosts[matchingRoom] === socket.id) {
+                    connections[matchingRoom].forEach((elem) => {
+                        io.to(elem).emit("meeting-terminated");
+                    });
+                }
+            }
+        });
+ 
         socket.on("disconnect", () => {
             console.log("=== BEFORE CLEANUP ===");
             console.log("Connections keys:", Object.keys(connections));
@@ -133,13 +167,17 @@ export const connectToSocket = (server) => {
                             const endTime = new Date();
                             const meetingCode = key.split('/').pop() || "MEETING";
                             const roomUserList = roomUsers[key] || [];
-                            const userId = roomUserList[0] || socketToUser[socket.id];
+                            const userId = roomHostDbId[key] || roomUserList[0] || socketToUser[socket.id];
+                            const roomWhiteboard = whiteboardHistory[key] || [];
 
                             delete connections[key];
                             delete messages[key];
                             delete transcripts[key];
                             delete roomStartTime[key];
                             delete roomUsers[key];
+                            delete whiteboardHistory[key];
+                            delete roomHosts[key];
+                            delete roomHostDbId[key];
 
                             if (userId) {
                                 (async () => {
@@ -152,6 +190,7 @@ export const connectToSocket = (server) => {
                                             endTime: formatTime(endTime),
                                             date: startTime,
                                             transcript: roomTranscripts,
+                                            whiteboardStrokes: roomWhiteboard,
                                             aiSummary: [],
                                             actionItems: [],
                                             decisions: []
@@ -180,6 +219,49 @@ export const connectToSocket = (server) => {
             console.log("Messages keys:", Object.keys(messages));
             console.log("TimeOnline keys count:", Object.keys(timeOnline).length);
         })
+
+        // --- WHITEBOARD HANDLERS ---
+        socket.on("whiteboard-stroke", (data) => {
+            const [matchingRoom, found] = Object.entries(connections)
+                .reduce(([room, isFound], [roomKey, roomValue]) => {
+                    if (!isFound && roomValue.includes(socket.id)) return [roomKey, true];
+                    return [room, isFound];
+                }, ['', false]);
+
+            if (found === true) {
+                if (whiteboardHistory[matchingRoom] === undefined) {
+                    whiteboardHistory[matchingRoom] = [];
+                }
+                whiteboardHistory[matchingRoom].push(data);
+                socket.broadcast.to(matchingRoom).emit('whiteboard-stroke', data);
+            }
+        });
+
+        socket.on("whiteboard-clear", () => {
+            const [matchingRoom, found] = Object.entries(connections)
+                .reduce(([room, isFound], [roomKey, roomValue]) => {
+                    if (!isFound && roomValue.includes(socket.id)) return [roomKey, true];
+                    return [room, isFound];
+                }, ['', false]);
+
+            if (found === true) {
+                whiteboardHistory[matchingRoom] = [];
+                socket.broadcast.to(matchingRoom).emit('whiteboard-clear');
+            }
+        });
+
+        socket.on("whiteboard-sync-full", (data) => {
+            const [matchingRoom, found] = Object.entries(connections)
+                .reduce(([room, isFound], [roomKey, roomValue]) => {
+                    if (!isFound && roomValue.includes(socket.id)) return [roomKey, true];
+                    return [room, isFound];
+                }, ['', false]);
+
+            if (found === true) {
+                whiteboardHistory[matchingRoom] = data;
+                socket.broadcast.to(matchingRoom).emit('whiteboard-state', data);
+            }
+        });
 
         // --- SYNC HANDLERS (Video & Audio Only) ---
         socket.on("video-toggle", (isEnabled) => {

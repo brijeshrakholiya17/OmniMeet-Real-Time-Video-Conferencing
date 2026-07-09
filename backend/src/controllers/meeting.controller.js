@@ -35,7 +35,7 @@ const generateSummary = async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: 'Here is a meeting transcript. Generate: 1) Executive summary (3-5 bullets), 2) Action items with owners/deadlines, 3) Key decisions. Return strictly as a JSON object: { "summary": [], "actionItems": [], "decisions": [] }.'
+                    content: "You are an expert executive assistant. Analyze this raw, unedited meeting transcript. It may contain speech-to-text errors, incomplete sentences, or background noise. Ignore the noise and focus strictly on extracting the core intent. Generate: 1) A clear Executive Summary (3 bullets), 2) Action items with owners/deadlines, 3) Key decisions. Format strictly as JSON: { \"summary\": [], \"actionItems\": [], \"decisions\": [] }."
                 },
                 {
                     role: "user",

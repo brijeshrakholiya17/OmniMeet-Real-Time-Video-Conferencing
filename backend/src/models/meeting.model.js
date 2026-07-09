@@ -15,7 +15,8 @@ const meetingSessionSchema = new Schema({
     ],
     aiSummary: [{ type: String }],
     actionItems: [{ type: String }],
-    decisions: [{ type: String }]
+    decisions: [{ type: String }],
+    whiteboardStrokes: { type: Array, default: [] }
 });
 
 const MeetingSession = mongoose.model("MeetingSession", meetingSessionSchema);

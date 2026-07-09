@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom';
 import io from "socket.io-client";
-import { Badge, IconButton, TextField, Button, Tabs, Tab, Box } from '@mui/material';
+import { Badge, IconButton, TextField, Button, Tabs, Tab, Box, useTheme, useMediaQuery, Menu, MenuItem, Typography } from '@mui/material';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff'
 import styles from "../styles/videoComponent.module.css";
@@ -14,8 +15,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import PeopleIcon from '@mui/icons-material/People';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InfoIcon from '@mui/icons-material/Info';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ClosedCaptionIcon from '@mui/icons-material/ClosedCaption';
+import BrushIcon from '@mui/icons-material/Brush';
+import Whiteboard from '../components/Whiteboard';
 import server from '../environment';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
@@ -31,6 +36,8 @@ const peerConfigConnections = {
 }
 
 export default function VideoMeetComponent() {
+    const router = useNavigate();
+    const { url } = useParams();
 
     var socketRef = useRef();
     let socketIdRef = useRef();
@@ -84,6 +91,11 @@ export default function VideoMeetComponent() {
     const [isHost, setIsHost] = useState(false);
     const [endCallAnchorEl, setEndCallAnchorEl] = useState(null);
     const audioRecorderRef = useRef(null);
+    const audioRef = useRef(audio);
+
+    useEffect(() => {
+        audioRef.current = audio;
+    }, [audio]);
 
     const handleEndCallClick = (event) => {
         if (!isHost) {
@@ -174,6 +186,28 @@ export default function VideoMeetComponent() {
                                 roomId: roomPath,
                                 chunk: event.data
                             });
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = (event) => {
+            if (!audio) return;
+            
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    const speechText = event.results[i][0].transcript.trim();
+                    if (speechText) {
+                        const timestamp = new Date();
+                        const segment = {
+                            speaker: username || "Me",
+                            text: speechText,
+                            timestamp: timestamp
+                        };
+                        
+                        if (socketRef.current) {
+                            socketRef.current.emit('new-transcript-segment', segment);
                         }
                     };
 
@@ -184,6 +218,10 @@ export default function VideoMeetComponent() {
             }
         } else {
             if (audioRecorderRef.current && audioRecorderRef.current.state !== "inactive") {
+        };
+
+        recognition.onend = () => {
+            if (!askForUsername && audioRef.current) {
                 try {
                     audioRecorderRef.current.stop();
                 } catch (error) {
@@ -487,6 +525,8 @@ export default function VideoMeetComponent() {
         } catch (e) { }
 
         window.location.href = "/home";
+        
+        router("/post-call", { state: { meetingCode: url } });
     }
 
     const connect = async () => {
@@ -548,6 +588,21 @@ export default function VideoMeetComponent() {
             }
         });
 
+        socketRef.current.on('whiteboard-state', (state) => {
+            whiteboardHistoryRef.current = state;
+        });
+        socketRef.current.on('whiteboard-stroke', (stroke) => {
+            whiteboardHistoryRef.current.push(stroke);
+        });
+        socketRef.current.on('whiteboard-clear', () => {
+            whiteboardHistoryRef.current = [];
+        });
+        socketRef.current.on('you-are-host', (isHostFlag) => {
+            setIsHost(isHostFlag);
+        });
+        socketRef.current.on('meeting-terminated', () => {
+            handleEndCall();
+        });
         socketRef.current.on('whiteboard-state', (state) => {
             whiteboardHistoryRef.current = state;
         });
@@ -673,6 +728,16 @@ export default function VideoMeetComponent() {
     const toggleTranscript = () => { setShowTranscript(!showTranscript); setModal(false); setShowParticipants(false); }
     const handleCopyLink = () => { navigator.clipboard.writeText(window.location.href); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000); }
 
+    const handleLocalStroke = (stroke) => {
+        whiteboardHistoryRef.current.push(stroke);
+    };
+    const handleLocalClear = () => {
+        whiteboardHistoryRef.current = [];
+    };
+    const handleLocalUndo = (newHistory) => {
+        whiteboardHistoryRef.current = newHistory;
+    };
+
     return (
         <div>
             {askForUsername ? (
@@ -761,10 +826,51 @@ export default function VideoMeetComponent() {
                                     <div className={styles.videoOffPlaceholder} style={{ display: videoObj.videoEnabled !== false ? 'none' : 'flex' }}>
                                         <AccountCircleIcon className={styles.videoOffIcon} />
                                         <p className={styles.videoOffText}>Camera Off</p>
+                    <div className={styles.mainStage} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+                        {/* Top Navbar */}
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            width: '100%',
+                            padding: '8px 16px',
+                            backgroundColor: 'rgba(20, 20, 20, 0.4)',
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            flexShrink: 0
+                        }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <IconButton onClick={() => setShowMeetingInfo(!showMeetingInfo)} style={{ color: 'white' }}>
+                                    <InfoOutlinedIcon />
+                                </IconButton>
+                                <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                    {window.location.pathname.split('/').pop() || "MEETING"}
+                                </Typography>
+                            </Box>
+                            <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 'bold' }}>
+                                {formatTime(currentTime)}
+                            </Typography>
+                        </Box>
+
+                        {/* Constrained Media Area */}
+                        <div style={{ flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
+                            {showMeetingInfo && (
+                                <div className={styles.meetingInfoCard} style={{ top: '10px', zIndex: 101 }}>
+                                    <div className={styles.meetingInfoHeader}>
+                                        <h3>Meeting Details</h3>
+                                        <IconButton size="small" onClick={() => setShowMeetingInfo(false)} style={{color: 'white'}}><CloseIcon fontSize="small"/></IconButton>
+                                    </div>
+                                    <div className={styles.infoSection}>
+                                        <span className={styles.infoLabel}>Joining Info</span>
+                                        <div className={styles.linkBox}>
+                                            <span className={styles.linkText}>{window.location.href}</span>
+                                            <IconButton size="small" onClick={handleCopyLink} style={{color: '#EB5545'}}><ContentCopyIcon fontSize="small"/></IconButton>
+                                        </div>
+                                        {copySuccess && <p className={styles.copySuccess}>Link copied!</p>}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            )}
 
                         {/* LOCAL VIDEO (PIP) */}
                         <div className={styles.localVideoContainer}>
@@ -780,9 +886,62 @@ export default function VideoMeetComponent() {
                             {!video && (
                                 <div className={styles.videoOffPlaceholder}>
                                     <AccountCircleIcon className={styles.videoOffIcon} style={{ fontSize: '2rem !important' }} />
+                            {/* REMOTE VIDEOS GRID OR WHITEBOARD */}
+                            {showWhiteboard ? (
+                                <Whiteboard
+                                    socket={socketRef.current}
+                                    room={window.location.href}
+                                    initialHistory={whiteboardHistoryRef.current}
+                                    onStrokeAdded={handleLocalStroke}
+                                    onClearBoard={handleLocalClear}
+                                    onUndo={handleLocalUndo}
+                                    onClose={() => setShowWhiteboard(false)}
+                                />
+                            ) : (
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))',
+                                    gap: '15px',
+                                    padding: '20px',
+                                    height: '100%',
+                                    width: '100%',
+                                    overflowY: 'auto'
+                                }}>
+                                    {videos.map((videoObj) => (
+                                        <div key={videoObj.socketId} className={styles.remoteVideoContainer}>
+                                             <div className={styles.userInfoOverlay}>
+                                                <AccountCircleIcon fontSize="small" style={{color:'white'}} />
+                                                <span className={styles.usernameText}>{videoObj.username || "Participant"}</span> 
+                                            </div>
+
+                                            <div className={styles.micStatusOverlay}>
+                                                {videoObj.audioEnabled !== false ? 
+                                                    <MicIcon fontSize="small" style={{color: 'white'}} /> : 
+                                                    <MicOffIcon fontSize="small" style={{color: '#EB5545'}} />
+                                                }
+                                            </div>
+
+                                            <video
+                                                className={styles.remoteVideo}
+                                                ref={ref => {
+                                                    if (ref && videoObj.stream) {
+                                                        if(ref.srcObject !== videoObj.stream) ref.srcObject = videoObj.stream;
+                                                    }
+                                                }}
+                                                autoPlay
+                                                playsInline
+                                                style={{ display: videoObj.videoEnabled !== false ? 'block' : 'none', width: '100%', height: '100%', objectFit: 'cover' }}
+                                            >
+                                            </video>
+                                             
+                                            <div className={styles.videoOffPlaceholder} style={{ display: videoObj.videoEnabled !== false ? 'none' : 'flex' }}>
+                                                <AccountCircleIcon className={styles.videoOffIcon} />
+                                                <p className={styles.videoOffText}>Camera Off</p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
-                        </div>
 
                         {/* Real-time Closed Captions Overlay */}
                         {currentCaption.text && (
@@ -837,6 +996,170 @@ export default function VideoMeetComponent() {
                         <IconButton onClick={handleEndCall} className={styles.iconBlockEnd}>
                             <CallEndIcon />
                         </IconButton>
+                            {/* LOCAL VIDEO (PIP) - Clamp-based layout */}
+                            <div style={{
+                                width: 'clamp(120px, 20vw, 250px)',
+                                aspectRatio: '16/9',
+                                position: 'absolute',
+                                bottom: 'clamp(10px, 2vw, 24px)',
+                                right: 'clamp(10px, 2vw, 24px)',
+                                zIndex: 40,
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                border: '2px solid rgba(255, 255, 255, 0.1)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                                background: '#1e1e1e'
+                            }}>
+                                 <div className={styles.userInfoOverlay} style={{ top: '8px', left: '8px', padding: '3px 8px' }}>
+                                    <span className={styles.usernameText} style={{ fontSize: '0.75rem', maxWidth: '60px' }}>{username} (You)</span>
+                                </div>
+                                
+                                <div className={styles.micStatusOverlay} style={{ top: '8px', right: '8px', padding: '3px' }}>
+                                    {audio ? <MicIcon style={{ fontSize: '0.85rem', color: 'white' }} /> : <MicOffIcon style={{ fontSize: '0.85rem', color: '#EB5545' }} />}
+                                </div>
+
+                                <video className={styles.localVideo} ref={localVideoref} autoPlay muted style={{ display: video ? 'block' : 'none', width: '100%', height: '100%', objectFit: 'cover' }}></video>
+                                {!video && (
+                                    <div className={styles.videoOffPlaceholder}>
+                                        <AccountCircleIcon className={styles.videoOffIcon} style={{ fontSize: '2rem !important' }} />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Responsive bottom controls bar */}
+                        <Box sx={{
+                            width: '100%',
+                            flexShrink: 0,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: 2,
+                            padding: 2,
+                            flexWrap: 'wrap',
+                            backgroundColor: 'rgba(25, 25, 25, 0.95)',
+                            backdropFilter: 'blur(15px)',
+                            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                            zIndex: 100
+                        }}>
+                            {/* Camera Toggle */}
+                            <IconButton onClick={() => updateMediaTrack('video')} className={video ? styles.iconBlockActive : styles.iconBlock}>
+                                {video ? <VideocamIcon /> : <VideocamOffIcon />}
+                            </IconButton>
+
+                            {/* Mic Toggle */}
+                            <IconButton onClick={() => updateMediaTrack('audio')} className={audio ? styles.iconBlockActive : styles.iconBlock}>
+                                {audio ? <MicIcon /> : <MicOffIcon />}
+                            </IconButton>
+
+                            {/* Responsive Desktop Buttons */}
+                            {!isMobile && (
+                                <>
+                                    {screenAvailable && (
+                                        <IconButton onClick={handleScreen} className={screen ? styles.iconBlock : styles.iconBlockActive}>
+                                            {screen ? <ScreenShareIcon /> : <StopScreenShareIcon />}
+                                        </IconButton>
+                                    )}
+                                    <Badge badgeContent={newMessages} color="error">
+                                        <IconButton onClick={toggleChat} className={styles.iconBlock}>
+                                            <ChatIcon />
+                                        </IconButton>
+                                    </Badge>
+                                    <IconButton onClick={toggleParticipants} className={styles.iconBlock}>
+                                        <PeopleIcon />
+                                    </IconButton>
+                                    <IconButton onClick={toggleTranscript} className={showTranscript ? styles.iconBlockActive : styles.iconBlock}>
+                                        <ClosedCaptionIcon />
+                                    </IconButton>
+                                    <IconButton onClick={() => setShowWhiteboard(!showWhiteboard)} className={showWhiteboard ? styles.iconBlockActive : styles.iconBlock}>
+                                        <BrushIcon />
+                                    </IconButton>
+                                </>
+                            )}
+
+                            {/* Mobile Three-Dots More Button & Menu */}
+                            {isMobile && (
+                                <>
+                                    <IconButton onClick={handleMoreClick} className={moreAnchorEl ? styles.iconBlockActive : styles.iconBlock}>
+                                        <MoreVertIcon />
+                                    </IconButton>
+                                    <Menu
+                                        anchorEl={moreAnchorEl}
+                                        open={Boolean(moreAnchorEl)}
+                                        onClose={handleMoreClose}
+                                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                                        transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                                        sx={{
+                                            '& .MuiPaper-root': {
+                                                backgroundColor: 'rgba(28, 28, 30, 0.98)',
+                                                backdropFilter: 'blur(10px)',
+                                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                color: 'white',
+                                                borderRadius: '12px',
+                                                minWidth: '180px'
+                                            }
+                                        }}
+                                    >
+                                        {screenAvailable && (
+                                            <MenuItem onClick={() => { handleMoreClose(); handleScreen(); }} sx={{ gap: 1.5 }}>
+                                                {screen ? <ScreenShareIcon fontSize="small" /> : <StopScreenShareIcon fontSize="small" />}
+                                                <Typography variant="body2">{screen ? 'Screen Share' : 'Stop Sharing'}</Typography>
+                                            </MenuItem>
+                                        )}
+                                        <MenuItem onClick={() => { handleMoreClose(); toggleChat(); }} sx={{ gap: 1.5 }}>
+                                            <Badge badgeContent={newMessages} color="error">
+                                                <ChatIcon fontSize="small" />
+                                            </Badge>
+                                            <Typography variant="body2">Chat</Typography>
+                                        </MenuItem>
+                                        <MenuItem onClick={() => { handleMoreClose(); toggleParticipants(); }} sx={{ gap: 1.5 }}>
+                                            <PeopleIcon fontSize="small" />
+                                            <Typography variant="body2">Participants ({videos.length + 1})</Typography>
+                                        </MenuItem>
+                                        <MenuItem onClick={() => { handleMoreClose(); toggleTranscript(); }} sx={{ gap: 1.5 }}>
+                                            <ClosedCaptionIcon fontSize="small" style={{ color: showTranscript ? '#EB5545' : 'white' }} />
+                                            <Typography variant="body2" style={{ color: showTranscript ? '#EB5545' : 'white' }}>Transcript</Typography>
+                                        </MenuItem>
+                                        <MenuItem onClick={() => { handleMoreClose(); setShowWhiteboard(!showWhiteboard); }} sx={{ gap: 1.5 }}>
+                                            <BrushIcon fontSize="small" style={{ color: showWhiteboard ? '#EB5545' : 'white' }} />
+                                            <Typography variant="body2" style={{ color: showWhiteboard ? '#EB5545' : 'white' }}>Whiteboard</Typography>
+                                        </MenuItem>
+                                    </Menu>
+                                </>
+                            )}
+
+                            {/* End Call */}
+                            <IconButton onClick={handleEndCallClick} className={styles.iconBlockEnd}>
+                                <CallEndIcon />
+                            </IconButton>
+
+                            {isHost && (
+                                <Menu
+                                    anchorEl={endCallAnchorEl}
+                                    open={Boolean(endCallAnchorEl)}
+                                    onClose={handleEndCallClose}
+                                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                                    transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                                    sx={{
+                                        '& .MuiPaper-root': {
+                                            backgroundColor: 'rgba(28, 28, 30, 0.98)',
+                                            backdropFilter: 'blur(10px)',
+                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            color: 'white',
+                                            borderRadius: '12px',
+                                            minWidth: '180px'
+                                        }
+                                    }}
+                                >
+                                    <MenuItem onClick={handleLeaveMeeting} sx={{ gap: 1.5 }}>
+                                        <Typography variant="body2">Leave Meeting</Typography>
+                                    </MenuItem>
+                                    <MenuItem onClick={handleEndMeetingForAll} sx={{ gap: 1.5, color: '#EB5545' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>End Meeting for All</Typography>
+                                    </MenuItem>
+                                </Menu>
+                            )}
+                        </Box>
                     </div>
                 </div>
 
@@ -911,6 +1234,9 @@ export default function VideoMeetComponent() {
                                     {messages.map((item, index) => (
                                         <div key={index} className={`${styles.chatBubble} ${item.sender === username ? styles.msgLocal : styles.msgRemote}`}>
                                             <span className={styles.senderName}>{item.sender}</span>{item.data}
+                                        <div className={styles.chattingArea}>
+                                            <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }} placeholder="Type a message..." variant="outlined" size="small" />
+                                            <Button variant='contained' onClick={sendMessage} sx={{ backgroundColor: '#EB5545', minWidth: '80px' }}>Send</Button>
                                         </div>
                                     ))}
                                 </div>
