@@ -1,11 +1,13 @@
 import { Server } from "socket.io"
 import { MeetingSession } from "../models/meeting.model.js"
 import jwt from "jsonwebtoken"
+import { User } from "../models/users.model.js"
+import { processLiveAudioStream, closeSTTStream } from "../services/speechService.js"
 
 let connections = {}
 let messages = {}
 let timeOnline = {}
-let transcripts = {}
+export let transcripts = {}
 let roomStartTime = {}
 let socketToUser = {}
 let roomUsers = {}
@@ -24,6 +26,11 @@ export const connectToSocket = (server) => {
     });
 
     io.on("connection", (socket) => {
+        socket.on("join-call", (path, token, clientUsername) => {
+            socket.join(path);
+            if (clientUsername) {
+                socket.username = clientUsername;
+            }
         socket.on("join-call", (path, token) => {
             socket.join(path);
             if (connections[path] === undefined) {
@@ -202,6 +209,8 @@ export const connectToSocket = (server) => {
                 }
             }
 
+            closeSTTStream(socket.id);
+
             delete socketToUser[socket.id];
             delete timeOnline[socket.id];
 
@@ -261,6 +270,14 @@ export const connectToSocket = (server) => {
 
         socket.on("audio-toggle", (isEnabled) => {
             broadcastToRoom(socket, "audio-toggle", isEnabled);
+        });
+
+        socket.on("stream-audio-chunk", (data) => {
+            if (data) {
+                const { roomId } = data;
+                // Pass user details, the binary chunk, and transcripts map to prevent circular dependencies
+                processLiveAudioStream(socket.id, roomId, socket.username, data.chunk, io, transcripts);
+            }
         });
 
         const broadcastToRoom = (socket, event, data) => {
