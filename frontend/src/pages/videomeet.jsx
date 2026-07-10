@@ -186,28 +186,6 @@ export default function VideoMeetComponent() {
                                 roomId: roomPath,
                                 chunk: event.data
                             });
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
-        recognition.maxAlternatives = 1;
-
-        recognition.onresult = (event) => {
-            if (!audio) return;
-            
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    const speechText = event.results[i][0].transcript.trim();
-                    if (speechText) {
-                        const timestamp = new Date();
-                        const segment = {
-                            speaker: username || "Me",
-                            text: speechText,
-                            timestamp: timestamp
-                        };
-                        
-                        if (socketRef.current) {
-                            socketRef.current.emit('new-transcript-segment', segment);
                         }
                     };
 
@@ -218,14 +196,10 @@ export default function VideoMeetComponent() {
             }
         } else {
             if (audioRecorderRef.current && audioRecorderRef.current.state !== "inactive") {
-        };
-
-        recognition.onend = () => {
-            if (!askForUsername && audioRef.current) {
                 try {
                     audioRecorderRef.current.stop();
                 } catch (error) {
-                    console.error("Failed to stop MediaRecorder:", error);
+                    console.error("Failed to stop MediaRecorder on mute:", error);
                 }
             }
             audioRecorderRef.current = null;
@@ -524,7 +498,7 @@ export default function VideoMeetComponent() {
             tracks.forEach(track => track.stop())
         } catch (e) { }
 
-        window.location.href = "/home";
+        // window.location.href = "/home"; // Removed to allow routing to post-call page
         
         router("/post-call", { state: { meetingCode: url } });
     }
@@ -769,63 +743,6 @@ export default function VideoMeetComponent() {
                 </div>
             ) : (
                 <div className={styles.meetVideoContainer}>
-                    <div className={styles.mainStage}>
-                        {/* Top Left Info */}
-                        <div className={styles.topLeftActions}>
-                            <IconButton onClick={() => setShowMeetingInfo(!showMeetingInfo)} style={{ color: 'white' }}>
-                                <InfoIcon />
-                            </IconButton>
-                        </div>
-
-                        {showMeetingInfo && (
-                            <div className={styles.meetingInfoCard}>
-                                <div className={styles.meetingInfoHeader}>
-                                    <h3>Meeting Details</h3>
-                                    <IconButton size="small" onClick={() => setShowMeetingInfo(false)} style={{ color: 'white' }}><CloseIcon fontSize="small" /></IconButton>
-                                </div>
-                                <div className={styles.infoSection}>
-                                    <span className={styles.infoLabel}>Joining Info</span>
-                                    <div className={styles.linkBox}>
-                                        <span className={styles.linkText}>{window.location.href}</span>
-                                        <IconButton size="small" onClick={handleCopyLink} style={{ color: '#EB5545' }}><ContentCopyIcon fontSize="small" /></IconButton>
-                                    </div>
-                                    {copySuccess && <p className={styles.copySuccess}>Link copied!</p>}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* REMOTE VIDEOS GRID */}
-                        <div className={styles.conferenceView}>
-                            {videos.map((videoObj) => (
-                                <div key={videoObj.socketId} className={styles.remoteVideoContainer}>
-                                    <div className={styles.userInfoOverlay}>
-                                        <AccountCircleIcon fontSize="small" style={{ color: 'white' }} />
-                                        <span className={styles.usernameText}>{videoObj.username || "Participant"}</span>
-                                    </div>
-
-                                    <div className={styles.micStatusOverlay}>
-                                        {videoObj.audioEnabled !== false ?
-                                            <MicIcon fontSize="small" style={{ color: 'white' }} /> :
-                                            <MicOffIcon fontSize="small" style={{ color: '#EB5545' }} />
-                                        }
-                                    </div>
-
-                                    <video
-                                        className={styles.remoteVideo}
-                                        ref={ref => {
-                                            if (ref && videoObj.stream) {
-                                                if (ref.srcObject !== videoObj.stream) ref.srcObject = videoObj.stream;
-                                            }
-                                        }}
-                                        autoPlay
-                                        playsInline
-                                        style={{ display: videoObj.videoEnabled !== false ? 'block' : 'none' }}
-                                    >
-                                    </video>
-
-                                    <div className={styles.videoOffPlaceholder} style={{ display: videoObj.videoEnabled !== false ? 'none' : 'flex' }}>
-                                        <AccountCircleIcon className={styles.videoOffIcon} />
-                                        <p className={styles.videoOffText}>Camera Off</p>
                     <div className={styles.mainStage} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
                         {/* Top Navbar */}
                         <Box sx={{
@@ -872,20 +789,35 @@ export default function VideoMeetComponent() {
                                 </div>
                             )}
 
-                        {/* LOCAL VIDEO (PIP) */}
-                        <div className={styles.localVideoContainer}>
-                            <div className={styles.userInfoOverlay}>
-                                <span className={styles.usernameText}>{username} (You)</span>
-                            </div>
+                            {/* LOCAL VIDEO (PIP) - Clamp-based layout */}
+                            <div style={{
+                                width: 'clamp(120px, 20vw, 250px)',
+                                aspectRatio: '16/9',
+                                position: 'absolute',
+                                bottom: 'clamp(10px, 2vw, 24px)',
+                                right: 'clamp(10px, 2vw, 24px)',
+                                zIndex: 40,
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                border: '2px solid rgba(255, 255, 255, 0.1)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                                background: '#1e1e1e'
+                            }}>
+                                 <div className={styles.userInfoOverlay} style={{ top: '8px', left: '8px', padding: '3px 8px' }}>
+                                    <span className={styles.usernameText} style={{ fontSize: '0.75rem', maxWidth: '60px' }}>{username} (You)</span>
+                                </div>
+                                
+                                <div className={styles.micStatusOverlay} style={{ top: '8px', right: '8px', padding: '3px' }}>
+                                    {audio ? <MicIcon style={{ fontSize: '0.85rem', color: 'white' }} /> : <MicOffIcon style={{ fontSize: '0.85rem', color: '#EB5545' }} />}
+                                </div>
 
-                            <div className={styles.micStatusOverlay}>
-                                {audio ? <MicIcon fontSize="small" style={{ color: 'white' }} /> : <MicOffIcon fontSize="small" style={{ color: '#EB5545' }} />}
+                                <video className={styles.localVideo} ref={localVideoref} autoPlay muted style={{ display: video ? 'block' : 'none', width: '100%', height: '100%', objectFit: 'cover' }}></video>
+                                {!video && (
+                                    <div className={styles.videoOffPlaceholder}>
+                                        <AccountCircleIcon className={styles.videoOffIcon} style={{ fontSize: '2rem !important' }} />
+                                    </div>
+                                )}
                             </div>
-
-                            <video className={styles.localVideo} ref={localVideoref} autoPlay muted style={{ display: video ? 'block' : 'none', width: '100%', height: '100%', objectFit: 'cover' }}></video>
-                            {!video && (
-                                <div className={styles.videoOffPlaceholder}>
-                                    <AccountCircleIcon className={styles.videoOffIcon} style={{ fontSize: '2rem !important' }} />
                             {/* REMOTE VIDEOS GRID OR WHITEBOARD */}
                             {showWhiteboard ? (
                                 <Whiteboard
@@ -970,62 +902,7 @@ export default function VideoMeetComponent() {
                         )}
                     </div>
 
-                    <div className={styles.buttonContainers}>
-                        <IconButton onClick={() => updateMediaTrack('video')} className={video ? styles.iconBlockActive : styles.iconBlock}>
-                            {video ? <VideocamIcon /> : <VideocamOffIcon />}
-                        </IconButton>
-                        <IconButton onClick={() => updateMediaTrack('audio')} className={audio ? styles.iconBlockActive : styles.iconBlock}>
-                            {audio ? <MicIcon /> : <MicOffIcon />}
-                        </IconButton>
-                        {screenAvailable && (
-                            <IconButton onClick={handleScreen} className={screen ? styles.iconBlock : styles.iconBlockActive}>
-                                {screen ? <ScreenShareIcon /> : <StopScreenShareIcon />}
-                            </IconButton>
-                        )}
-                        <Badge badgeContent={newMessages} color="error">
-                            <IconButton onClick={toggleChat} className={styles.iconBlock}>
-                                <ChatIcon />
-                            </IconButton>
-                        </Badge>
-                        <IconButton onClick={toggleParticipants} className={styles.iconBlock}>
-                            <PeopleIcon />
-                        </IconButton>
-                        <IconButton onClick={toggleTranscript} className={showTranscript ? styles.iconBlockActive : styles.iconBlock}>
-                            <ClosedCaptionIcon />
-                        </IconButton>
-                        <IconButton onClick={handleEndCall} className={styles.iconBlockEnd}>
-                            <CallEndIcon />
-                        </IconButton>
-                            {/* LOCAL VIDEO (PIP) - Clamp-based layout */}
-                            <div style={{
-                                width: 'clamp(120px, 20vw, 250px)',
-                                aspectRatio: '16/9',
-                                position: 'absolute',
-                                bottom: 'clamp(10px, 2vw, 24px)',
-                                right: 'clamp(10px, 2vw, 24px)',
-                                zIndex: 40,
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                                border: '2px solid rgba(255, 255, 255, 0.1)',
-                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                                background: '#1e1e1e'
-                            }}>
-                                 <div className={styles.userInfoOverlay} style={{ top: '8px', left: '8px', padding: '3px 8px' }}>
-                                    <span className={styles.usernameText} style={{ fontSize: '0.75rem', maxWidth: '60px' }}>{username} (You)</span>
-                                </div>
-                                
-                                <div className={styles.micStatusOverlay} style={{ top: '8px', right: '8px', padding: '3px' }}>
-                                    {audio ? <MicIcon style={{ fontSize: '0.85rem', color: 'white' }} /> : <MicOffIcon style={{ fontSize: '0.85rem', color: '#EB5545' }} />}
-                                </div>
 
-                                <video className={styles.localVideo} ref={localVideoref} autoPlay muted style={{ display: video ? 'block' : 'none', width: '100%', height: '100%', objectFit: 'cover' }}></video>
-                                {!video && (
-                                    <div className={styles.videoOffPlaceholder}>
-                                        <AccountCircleIcon className={styles.videoOffIcon} style={{ fontSize: '2rem !important' }} />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
 
                         {/* Responsive bottom controls bar */}
                         <Box sx={{
@@ -1161,7 +1038,6 @@ export default function VideoMeetComponent() {
                             )}
                         </Box>
                     </div>
-                </div>
 
                     {/* RESIZER & SIDEBAR CONTAINER */}
             {(showParticipants || showModal || showTranscript) && (
@@ -1234,14 +1110,11 @@ export default function VideoMeetComponent() {
                                     {messages.map((item, index) => (
                                         <div key={index} className={`${styles.chatBubble} ${item.sender === username ? styles.msgLocal : styles.msgRemote}`}>
                                             <span className={styles.senderName}>{item.sender}</span>{item.data}
-                                        <div className={styles.chattingArea}>
-                                            <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }} placeholder="Type a message..." variant="outlined" size="small" />
-                                            <Button variant='contained' onClick={sendMessage} sx={{ backgroundColor: '#EB5545', minWidth: '80px' }}>Send</Button>
                                         </div>
                                     ))}
                                 </div>
                                 <div className={styles.chattingArea}>
-                                    <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." variant="outlined" size="small" />
+                                    <TextField className={styles.textFieldOverride} value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }} placeholder="Type a message..." variant="outlined" size="small" />
                                     <Button variant='contained' onClick={sendMessage} sx={{ backgroundColor: '#EB5545', minWidth: '80px' }}>Send</Button>
                                 </div>
                             </div>
@@ -1281,9 +1154,8 @@ export default function VideoMeetComponent() {
                     </div>
                 </>
             )}
+                </div>
+            )}
         </div>
-    )
-}
-        </div >
     )
 }
