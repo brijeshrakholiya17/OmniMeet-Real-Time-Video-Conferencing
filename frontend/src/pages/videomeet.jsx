@@ -562,21 +562,7 @@ export default function VideoMeetComponent() {
             }
         });
 
-        socketRef.current.on('whiteboard-state', (state) => {
-            whiteboardHistoryRef.current = state;
-        });
-        socketRef.current.on('whiteboard-stroke', (stroke) => {
-            whiteboardHistoryRef.current.push(stroke);
-        });
-        socketRef.current.on('whiteboard-clear', () => {
-            whiteboardHistoryRef.current = [];
-        });
-        socketRef.current.on('you-are-host', (isHostFlag) => {
-            setIsHost(isHostFlag);
-        });
-        socketRef.current.on('meeting-terminated', () => {
-            handleEndCall();
-        });
+
         socketRef.current.on('whiteboard-state', (state) => {
             whiteboardHistoryRef.current = state;
         });

@@ -18,8 +18,9 @@ export const AuthProvider = ({ children }) => {
     // Restore session on load
     useEffect(() => {
         const token = localStorage.getItem("token");
+        const storedUsername = localStorage.getItem("username");
         if (token) {
-            setUserData({ token });
+            setUserData({ token, username: storedUsername || "" });
         }
     }, []);
 
@@ -48,7 +49,8 @@ export const AuthProvider = ({ children }) => {
 
             if (request.status === httpStatus.OK) {
                 localStorage.setItem("token", request.data.token);
-                setUserData({ token: request.data.token });
+                localStorage.setItem("username", request.data.username || username);
+                setUserData({ token: request.data.token, username: request.data.username || username });
                 router("/home");
             }
         } catch (err) {
@@ -58,6 +60,7 @@ export const AuthProvider = ({ children }) => {
 
     const handleLogout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("username");
         setUserData(null);
         router("/"); // Optional: Redirect to landing page
     }
