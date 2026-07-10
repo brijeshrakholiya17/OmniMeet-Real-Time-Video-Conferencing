@@ -31,8 +31,6 @@ export const connectToSocket = (server) => {
             if (clientUsername) {
                 socket.username = clientUsername;
             }
-        socket.on("join-call", (path, token) => {
-            socket.join(path);
             if (connections[path] === undefined) {
                 connections[path] = []
                 roomStartTime[path] = new Date();

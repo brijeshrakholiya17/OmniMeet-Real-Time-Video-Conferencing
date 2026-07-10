@@ -215,7 +215,7 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
                                         <Button 
                                             variant="outlined" 
                                             size="small"
-                                            disabled={generatingId === e._id}
+                                            disabled={generatingId === e._id || !e.transcript || e.transcript.length === 0}
                                             startIcon={generatingId === e._id ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeIcon />}
                                             onClick={() => handleGenerateSummary(e._id)}
                                             sx={{ 
@@ -226,7 +226,7 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
                                                 '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)', borderColor: 'rgba(255,255,255,0.1)' }
                                             }}
                                         >
-                                            {generatingId === e._id ? 'Generating...' : 'Generate AI Summary'}
+                                            {generatingId === e._id ? 'Generating...' : (!e.transcript || e.transcript.length === 0) ? 'No Transcript' : 'Generate AI Summary'}
                                         </Button>
                                     )}
 
