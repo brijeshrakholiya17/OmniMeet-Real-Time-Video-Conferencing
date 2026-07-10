@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react'
 import withAuth from '../utils/withAuth'
 import { useNavigate } from 'react-router-dom'
 import "../styles/HomeComponent.css"; 
-import { Button, IconButton, TextField } from '@mui/material';
+import { Button, IconButton, TextField, Avatar, Menu, MenuItem, Box, Typography } from '@mui/material';
 import RestoreIcon from '@mui/icons-material/Restore';
 import { AuthContext } from '../contexts/AuthContext';
 // --- NEW IMPORTS FOR MENU ---
@@ -15,8 +15,18 @@ function HomeComponent() {
     let navigate = useNavigate();
     const [meetingCode, setMeetingCode] = useState("");
     const [isMenuOpen, setIsMenuOpen] = useState(false); // State for Mobile Menu
+    const [profileAnchorEl, setProfileAnchorEl] = useState(null);
+    const isProfileMenuOpen = Boolean(profileAnchorEl);
 
-    const { handleLogout } = useContext(AuthContext);
+    const { handleLogout, userData } = useContext(AuthContext);
+
+    const handleProfileClick = (event) => {
+        setProfileAnchorEl(event.currentTarget);
+    };
+
+    const handleProfileClose = () => {
+        setProfileAnchorEl(null);
+    };
 
     let handleJoinVideoCall = async () => {
         if(meetingCode.trim() === "") return; 
@@ -26,6 +36,8 @@ function HomeComponent() {
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     }
+
+    const firstLetter = (userData?.username || "U").charAt(0).toUpperCase();
 
     return (
         <div className="homeContainer">
@@ -46,13 +58,64 @@ function HomeComponent() {
                         <p>History</p>
                     </div>
 
-                    <Button 
-                        onClick={handleLogout} 
-                        className="logoutBtn" 
-                        variant="outlined"
-                    >
-                        Logout
-                    </Button>
+                    {userData && (
+                        <>
+                            <IconButton onClick={handleProfileClick} sx={{ p: 0 }}>
+                                <Avatar 
+                                    sx={{ 
+                                        bgcolor: '#EB5545', 
+                                        color: 'white', 
+                                        fontWeight: 'bold', 
+                                        cursor: 'pointer',
+                                        width: 40,
+                                        height: 40,
+                                        transition: 'transform 0.2s',
+                                        '&:hover': { transform: 'scale(1.05)' }
+                                    }}
+                                >
+                                    {firstLetter}
+                                </Avatar>
+                            </IconButton>
+
+                            <Menu
+                                anchorEl={profileAnchorEl}
+                                open={isProfileMenuOpen}
+                                onClose={handleProfileClose}
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                                sx={{
+                                    '& .MuiPaper-root': {
+                                        backgroundColor: '#1c1c1e',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        borderRadius: '12px',
+                                        minWidth: '180px',
+                                        marginTop: '8px',
+                                        boxShadow: '0 8px 16px rgba(0,0,0,0.5)'
+                                    }
+                                }}
+                            >
+                                <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>Logged in as</Typography>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', textTransform: 'capitalize', color: 'white', mt: 0.5 }}>
+                                        {userData.username}
+                                    </Typography>
+                                </Box>
+                                <MenuItem 
+                                    onClick={() => { handleProfileClose(); handleLogout(); }} 
+                                    sx={{ 
+                                        gap: 1.5, 
+                                        py: 1.2, 
+                                        fontSize: '0.9rem',
+                                        '&:hover': { backgroundColor: 'rgba(235, 85, 69, 0.08)', color: '#EB5545' } 
+                                    }}
+                                >
+                                    <LogoutIcon fontSize="small" />
+                                    Logout
+                                </MenuItem>
+                            </Menu>
+                        </>
+                    )}
                 </div>
 
                 {/* --- MOBILE MENU ICON (Visible only on Mobile) --- */}
@@ -66,11 +129,19 @@ function HomeComponent() {
             {/* --- MOBILE DROPDOWN (Conditionally Rendered) --- */}
             {isMenuOpen && (
                 <div className="mobileMenuDropdown">
-                    <div className="mobileMenuItem" onClick={() => navigate("/history")}>
+                    {userData && (
+                        <div className="mobileMenuUserHeader">
+                            <Avatar sx={{ bgcolor: '#EB5545', color: 'white', fontWeight: 'bold', width: 32, height: 32 }}>
+                                {firstLetter}
+                            </Avatar>
+                            <span className="mobileUsername">{userData.username}</span>
+                        </div>
+                    )}
+                    <div className="mobileMenuItem" onClick={() => { setIsMenuOpen(false); navigate("/history"); }}>
                         <RestoreIcon fontSize="small" />
                         <span>History</span>
                     </div>
-                    <div className="mobileMenuItem" onClick={handleLogout}>
+                    <div className="mobileMenuItem" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
                         <LogoutIcon fontSize="small" />
                         <span>Logout</span>
                     </div>
