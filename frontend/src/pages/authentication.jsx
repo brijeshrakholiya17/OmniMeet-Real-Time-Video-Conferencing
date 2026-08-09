@@ -27,6 +27,9 @@ export default function Authentication() {
         if (location.state?.formState !== undefined) {
             setFormState(location.state.formState);
         }
+        if (location.state?.message) {
+            setError(location.state.message);
+        }
     }, [location.state]);
 
     const handleAuth = async (e) => {
@@ -73,8 +76,11 @@ export default function Authentication() {
                 setName("");
             }
         } catch (err) {
-            console.error(err);
-            let errMsg = err?.response?.data?.message || "Something went wrong";
+            console.error("Auth error:", err);
+            let errMsg = err?.response?.data?.message || err?.response?.data || err?.message || "Something went wrong";
+            if (typeof errMsg !== "string") {
+                errMsg = "Authentication failed. Please check your credentials.";
+            }
             setError(errMsg);
         } finally {
             setIsLoading(false);

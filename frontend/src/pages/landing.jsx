@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react' // <--- Added useEffect
+import React, { useContext, useState, useEffect } from 'react'
 import "../App.css"
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../contexts/AuthContext';
@@ -14,6 +14,14 @@ export default function LandingPage() {
     // --- TYPEWRITER STATE ---
     const [typedText, setTypedText] = useState("");
     const targetText = "Cover a distance by OmniMeet";
+
+    // --- AUTO-REDIRECT FOR AUTHENTICATED USERS ---
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (userData || token) {
+            router('/home', { replace: true });
+        }
+    }, [userData, router]);
 
     const generateRoomCode = () => {
         const chars = "abcdefghijklmnopqrstuvwxyz";
@@ -31,7 +39,7 @@ export default function LandingPage() {
             } else {
                 clearInterval(typingInterval);
             }
-        }, 100); // Adjust typing speed (ms) here
+        }, 100);
 
         return () => clearInterval(typingInterval);
     }, []);
@@ -49,15 +57,14 @@ export default function LandingPage() {
                     <h2>OmniMeet</h2>
                 </div>
                 <div className='navlist'>
-                    <div className='guestBtn' onClick={() => {
-                        const roomId = generateRoomCode();
-                        router(`/${roomId}`);
-                    }}>
-                        Join as Guest
-                    </div>
-
                     {!userData ? (
                         <>
+                            <div className='guestBtn' onClick={() => {
+                                const roomId = generateRoomCode();
+                                router(`/${roomId}`);
+                            }}>
+                                Join as Guest
+                            </div>
                             <div className='authBtn' onClick={() => router("/auth", { state: { formState: 1 } })}>
                                 Register
                             </div>
@@ -66,9 +73,14 @@ export default function LandingPage() {
                             </div>
                         </>
                     ) : (
-                        <div className='authBtn loginBtn' onClick={logoutUser}>
-                            Logout
-                        </div>
+                        <>
+                            <div className='authBtn' onClick={() => router('/home')}>
+                                Go to Dashboard
+                            </div>
+                            <div className='authBtn loginBtn' onClick={logoutUser}>
+                                Logout
+                            </div>
+                        </>
                     )}
                 </div>
             </nav>
@@ -77,7 +89,6 @@ export default function LandingPage() {
                 <div className="textSection">
                     <h1><span style={{ color: "#EB5545" }}>Connect</span> with your loved Ones</h1>
                     
-                    {/* UPDATED TYPING TEXT ELEMENT */}
                     <p className='typingText'>{typedText}</p>
                     
                     <div className="actionBtn" role='button'>
