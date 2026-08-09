@@ -11,6 +11,9 @@ export default function PostCallComponent() {
     const navigate = useNavigate();
     const meetingCode = location.state?.meetingCode || "";
 
+    const rawToken = localStorage.getItem("token");
+    const isGuest = location.state?.isGuest || !rawToken || rawToken === "null" || rawToken === "undefined";
+
     const [rating, setRating] = useState(0);
 
     const handleRejoin = () => {
@@ -20,7 +23,15 @@ export default function PostCallComponent() {
     };
 
     const handleGoHome = () => {
-        navigate('/home');
+        if (isGuest) {
+            navigate('/');
+        } else {
+            navigate('/home');
+        }
+    };
+
+    const handleSignUp = () => {
+        navigate('/auth', { state: { formState: 1 } });
     };
 
     return (
@@ -109,7 +120,10 @@ export default function PostCallComponent() {
                             fontFamily: '"DM Sans", sans-serif'
                         }}
                     >
-                        Your call has ended. You can rejoin or return to your dashboard.
+                        {isGuest 
+                            ? "Your call has ended. Rejoin or sign up to save your meeting history."
+                            : "Your call has ended. You can rejoin or return to your dashboard."
+                        }
                     </Typography>
                 </Box>
 
@@ -191,30 +205,82 @@ export default function PostCallComponent() {
                         Rejoin Meeting
                     </Button>
 
-                    <Button
-                        variant="outlined"
-                        fullWidth
-                        onClick={handleGoHome}
-                        startIcon={<HomeIcon />}
-                        sx={{
-                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                            color: 'white',
-                            fontWeight: 500,
-                            padding: '10px 24px',
-                            borderRadius: '12px',
-                            textTransform: 'none',
-                            fontSize: '0.95rem',
-                            fontFamily: '"DM Sans", sans-serif',
-                            '&:hover': {
-                                borderColor: 'white',
-                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                transform: 'translateY(-1px)',
-                            },
-                            transition: 'all 0.2s ease-in-out'
-                        }}
-                    >
-                        Return to Home
-                    </Button>
+                    {isGuest ? (
+                        <>
+                            <Button
+                                variant="outlined"
+                                fullWidth
+                                onClick={handleSignUp}
+                                sx={{
+                                    borderColor: '#EB5545',
+                                    color: '#EB5545',
+                                    fontWeight: 600,
+                                    padding: '10px 24px',
+                                    borderRadius: '12px',
+                                    textTransform: 'none',
+                                    fontSize: '0.95rem',
+                                    fontFamily: '"DM Sans", sans-serif',
+                                    '&:hover': {
+                                        borderColor: '#ff3b2f',
+                                        backgroundColor: 'rgba(235, 85, 69, 0.1)',
+                                        transform: 'translateY(-1px)',
+                                    },
+                                    transition: 'all 0.2s ease-in-out'
+                                }}
+                            >
+                                Sign Up to Save History
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                fullWidth
+                                onClick={handleGoHome}
+                                startIcon={<HomeIcon />}
+                                sx={{
+                                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                                    color: 'white',
+                                    fontWeight: 500,
+                                    padding: '10px 24px',
+                                    borderRadius: '12px',
+                                    textTransform: 'none',
+                                    fontSize: '0.95rem',
+                                    fontFamily: '"DM Sans", sans-serif',
+                                    '&:hover': {
+                                        borderColor: 'white',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                        transform: 'translateY(-1px)',
+                                    },
+                                    transition: 'all 0.2s ease-in-out'
+                                }}
+                            >
+                                Return to Landing Page
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            variant="outlined"
+                            fullWidth
+                            onClick={handleGoHome}
+                            startIcon={<HomeIcon />}
+                            sx={{
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                                color: 'white',
+                                fontWeight: 500,
+                                padding: '10px 24px',
+                                borderRadius: '12px',
+                                textTransform: 'none',
+                                fontSize: '0.95rem',
+                                fontFamily: '"DM Sans", sans-serif',
+                                '&:hover': {
+                                    borderColor: 'white',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                    transform: 'translateY(-1px)',
+                                },
+                                transition: 'all 0.2s ease-in-out'
+                            }}
+                        >
+                            Return to Home
+                        </Button>
+                    )}
                 </Box>
             </Paper>
         </Box>

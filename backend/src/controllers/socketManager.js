@@ -177,12 +177,13 @@ export const connectToSocket = (server) => {
                             delete roomHosts[key];
                             delete roomHostDbId[key];
 
-                            if (userId) {
+                            if (userId || (roomUserList && roomUserList.length > 0)) {
                                 (async () => {
                                     try {
+                                        const mainUserId = userId || roomUserList[0];
                                         const formatTime = (date) => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
                                         const newSession = new MeetingSession({
-                                            userId,
+                                            userId: mainUserId,
                                             meetingCode,
                                             startTime: formatTime(startTime),
                                             endTime: formatTime(endTime),
@@ -194,7 +195,26 @@ export const connectToSocket = (server) => {
                                             decisions: []
                                         });
                                         await newSession.save();
-                                        console.log("MeetingSession successfully saved to database on room close.");
+                                        console.log("MeetingSession successfully saved to database on room close:", newSession._id);
+
+                                        // Update User history for all authenticated participants in the room
+                                        const uniqueUsers = Array.from(new Set(roomUserList.concat(mainUserId ? [mainUserId] : [])));
+                                        for (const uId of uniqueUsers) {
+                                            try {
+                                                await User.findByIdAndUpdate(uId, {
+                                                    $push: {
+                                                        history: {
+                                                            meetingCode,
+                                                            date: startTime,
+                                                            startTime: formatTime(startTime),
+                                                            endTime: formatTime(endTime)
+                                                        }
+                                                    }
+                                                });
+                                            } catch (uErr) {
+                                                console.error(`Error updating User history for user ${uId}:`, uErr);
+                                            }
+                                        }
                                     } catch (dbErr) {
                                         console.error("Failed to save MeetingSession to database on room close:", dbErr);
                                     }

@@ -145,30 +145,43 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         if (!socket) return;
 
         const handleWhiteboardStroke = (data) => {
-            drawNormalizedLine(data.x0, data.y0, data.x1, data.y1, data.color, data.size, data.brushType);
-            setLocalHistory(prev => [...prev, data]);
+            if (!canvasRef.current || !contextRef.current || !data) return;
+            try {
+                drawNormalizedLine(data.x0, data.y0, data.x1, data.y1, data.color, data.size, data.brushType);
+                setLocalHistory(prev => [...prev, data]);
+            } catch (err) {
+                console.warn("Whiteboard stroke render suppressed:", err);
+            }
         };
 
         const handleWhiteboardState = (state) => {
-            setLocalHistory(state);
-            // Clear and repaint with new history state
-            const canvas = canvasRef.current;
-            const ctx = contextRef.current;
-            if (canvas && ctx) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                state.forEach(stroke => {
-                    drawNormalizedLine(stroke.x0, stroke.y0, stroke.x1, stroke.y1, stroke.color, stroke.size, stroke.brushType);
-                });
+            if (!Array.isArray(state)) return;
+            try {
+                setLocalHistory(state);
+                const canvas = canvasRef.current;
+                const ctx = contextRef.current;
+                if (canvas && ctx) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    state.forEach(stroke => {
+                        drawNormalizedLine(stroke.x0, stroke.y0, stroke.x1, stroke.y1, stroke.color, stroke.size, stroke.brushType);
+                    });
+                }
+            } catch (err) {
+                console.warn("Whiteboard state sync suppressed:", err);
             }
         };
 
         const handleWhiteboardClear = () => {
-            const canvas = canvasRef.current;
-            const ctx = contextRef.current;
-            if (canvas && ctx) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            try {
+                const canvas = canvasRef.current;
+                const ctx = contextRef.current;
+                if (canvas && ctx) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+                setLocalHistory([]);
+            } catch (err) {
+                console.warn("Whiteboard clear suppressed:", err);
             }
-            setLocalHistory([]);
         };
 
         socket.on('whiteboard-stroke', handleWhiteboardStroke);
