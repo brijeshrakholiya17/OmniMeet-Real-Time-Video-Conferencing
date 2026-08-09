@@ -1,19 +1,335 @@
-*{
+/* ==========================================================================
+   OMNIMEET DESIGN SYSTEM - ORGANIC BIOMORPHIC AESTHETIC (index.css)
+   ========================================================================== */
+
+/* 1. GOOGLE FONTS IMPORT */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* 2. REGISTER CUSTOM CSS PROPERTIES FOR CONIC ANGLE & LIQUID ANIMATIONS */
+@property --conic-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --liquid-glow-offset {
+  syntax: '<percentage>';
+  initial-value: 0%;
+  inherits: false;
+}
+
+/* 3. BIOMORPHIC DESIGN TOKENS & CSS CUSTOM PROPERTIES */
+:root {
+  /* --- Typography --- */
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* --- Bioluminescent Palette --- */
+  --bg-void: #050608;
+  --bg-void-deep: #020304;
+  --bg-organic-surface: rgba(14, 18, 26, 0.7);
+  --bg-organic-elevated: rgba(22, 28, 40, 0.85);
+  
+  --accent-biolum-coral: #FF453A;
+  --accent-biolum-cyan: #00F2FE;
+  --accent-biolum-violet: #7B2CBF;
+  --accent-biolum-emerald: #00F5D4;
+
+  --biolum-coral-glow: rgba(255, 69, 58, 0.45);
+  --biolum-cyan-glow: rgba(0, 242, 254, 0.35);
+  --biolum-violet-glow: rgba(123, 44, 191, 0.35);
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* --- Organic Border Morphing Radii --- */
+  --radius-biomorphic-1: 38% 62% 63% 37% / 41% 44% 56% 59%;
+  --radius-biomorphic-2: 64% 36% 27% 73% / 69% 28% 72% 31%;
+  --radius-biomorphic-3: 45% 55% 58% 42% / 37% 53% 47% 63%;
+  --radius-organic-pill: 60px;
+  --radius-organic-card: 32px;
+
+  /* --- Tactile Shadows & Soft Inner Lighting --- */
+  --glass-bg: rgba(16, 22, 32, 0.6);
+  --glass-bg-elevated: rgba(24, 32, 46, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-hover: rgba(255, 69, 58, 0.5);
+  --glass-blur: blur(28px) saturate(190%);
+
+  --tactile-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.18), inset 0 -2px 6px rgba(0, 0, 0, 0.6), 0 25px 60px rgba(0, 0, 0, 0.85);
+  --tactile-glow-coral: 0 0 35px rgba(255, 69, 58, 0.45), inset 0 0 20px rgba(255, 69, 58, 0.2);
+  --tactile-glow-cyan: 0 0 35px rgba(0, 242, 254, 0.35), inset 0 0 20px rgba(0, 242, 254, 0.15);
+
+  /* --- Motion & Liquid Easing --- */
+  --ease-organic: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-fluid-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-fluid: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* 4. GLOBAL RESET & BIOMORPHIC NOISE OVERLAY */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  background-color: var(--bg-void);
+  color-scheme: dark;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg-void);
+  background-image: 
+    radial-gradient(circle at 50% -10%, rgba(255, 69, 58, 0.18) 0%, transparent 60%),
+    radial-gradient(circle at 100% 80%, rgba(0, 242, 254, 0.12) 0%, transparent 55%),
+    radial-gradient(circle at -10% 80%, rgba(123, 44, 191, 0.12) 0%, transparent 55%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* SVG Synthetic Noise Texture Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.6;
+}
+
+/* 5. LIQUID MORPHING KEYFRAMES */
+@keyframes liquidMorph {
+  0% {
+    border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+  }
+  33% {
+    border-radius: 64% 36% 27% 73% / 69% 28% 72% 31%;
+  }
+  66% {
+    border-radius: 45% 55% 58% 42% / 37% 53% 47% 63%;
+  }
+  100% {
+    border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+  }
+}
+
+@keyframes conicRotate {
+  0% { --conic-angle: 0deg; }
+  100% { --conic-angle: 360deg; }
+}
+
+@keyframes liquidPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px var(--biolum-coral-glow)); }
+  50% { transform: scale(1.03); filter: drop-shadow(0 0 40px var(--biolum-coral-glow)); }
+}
+
+/* 6. FLUID TYPOGRAPHY SCALE */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+
+h1 {
+  font-size: clamp(2.6rem, 6vw + 1rem, 5rem);
+}
+
+h2 {
+  font-size: clamp(2.1rem, 4vw + 0.8rem, 3.5rem);
+}
+
+h3 {
+  font-size: clamp(1.7rem, 2.8vw + 0.5rem, 2.6rem);
+}
+
+h4 {
+  font-size: clamp(1.35rem, 2vw + 0.4rem, 1.9rem);
+}
+
+h5 {
+  font-size: clamp(1.15rem, 1.4vw + 0.3rem, 1.5rem);
+}
+
+h6 {
+  font-size: clamp(0.95rem, 0.9vw + 0.3rem, 1.15rem);
+}
+
+p, span, label, input, textarea {
+  font-family: var(--font-body);
+}
+
+code, pre, .mono-text {
+  font-family: var(--font-mono);
+}
+
+/* 7. INTERACTIVE TRANSITIONS & HARDWARE-ACCELERATED TRANSFORMS */
+a, button, input, select, textarea, [role="button"],
+.MuiButton-root, .MuiIconButton-root, .MuiCard-root, .MuiPaper-root {
+  transition: var(--transition-fluid);
+}
+
+a {
+  color: var(--accent-biolum-coral);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-biolum-cyan);
+}
+
+/* 8. MATERIAL UI OVERRIDES FOR ORGANIC BIOMORPHIC THEME */
+
+/* --- Organic Glass Cards & Dialog Papers --- */
+.MuiPaper-root,
+.MuiCard-root {
+  background: var(--glass-bg-elevated) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-organic-card) !important;
+  box-shadow: var(--tactile-shadow) !important;
+  color: var(--text-primary) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.MuiCard-root {
+  transition: transform 0.5s var(--ease-organic), border-color 0.5s var(--ease-organic), box-shadow 0.5s var(--ease-organic) !important;
+}
+
+.MuiCard-root:hover {
+  border-color: var(--glass-border-hover) !important;
+  box-shadow: var(--tactile-shadow), var(--tactile-glow-coral) !important;
+  transform: translateY(-6px) scale3d(1.02, 1.02, 1) !important;
+}
+
+/* --- Organic Outlined Inputs --- */
+.MuiOutlinedInput-root {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 20px !important;
+  transition: transform 0.4s var(--ease-organic), border-color 0.4s var(--ease-organic), box-shadow 0.4s var(--ease-organic) !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused {
+  transform: scale3d(1.02, 1.02, 1) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--accent-biolum-coral) !important;
+  box-shadow: var(--tactile-glow-coral) !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: var(--glass-border) !important;
+  transition: var(--transition-fluid) !important;
+}
+
+.MuiInputLabel-root {
+  color: var(--text-secondary) !important;
+  font-family: var(--font-body) !important;
+}
+
+.MuiInputLabel-root.Mui-focused {
+  color: var(--accent-biolum-coral) !important;
+}
+
+/* --- Bioluminescent Liquid Buttons --- */
+.MuiButton-root {
+  font-family: var(--font-heading) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em !important;
+  border-radius: var(--radius-organic-pill) !important;
+  text-transform: none !important;
+  padding: 12px 28px !important;
+  transition: transform 0.4s var(--ease-fluid-bounce), background-color 0.4s var(--ease-organic), box-shadow 0.4s var(--ease-organic) !important;
+}
+
+.MuiButton-containedPrimary,
+.MuiButton-contained {
+  background: linear-gradient(135deg, var(--accent-biolum-coral) 0%, #d6281c 100%) !important;
+  color: #ffffff !important;
+  box-shadow: var(--tactile-glow-coral), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+.MuiButton-containedPrimary:hover,
+.MuiButton-contained:hover {
+  transform: scale3d(1.05, 1.05, 1) translateY(-2px) !important;
+  box-shadow: 0 15px 40px rgba(255, 69, 58, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+.MuiButton-outlined {
+  border: 1px solid var(--glass-border) !important;
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.MuiButton-outlined:hover {
+  border-color: var(--accent-biolum-coral) !important;
+  color: var(--accent-biolum-coral) !important;
+  background: rgba(255, 69, 58, 0.12) !important;
+  transform: translateY(-2px) !important;
+}
+
+.MuiIconButton-root {
+  color: var(--text-primary) !important;
+  border-radius: 50% !important;
+  transition: transform 0.4s var(--ease-fluid-bounce), background-color 0.4s var(--ease-organic) !important;
+}
+
+.MuiIconButton-root:hover {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  transform: scale(1.12) !important;
+}
+
+/* --- Dialog Overlay Paper --- */
+.MuiDialog-paper {
+  background: var(--glass-bg-elevated) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 36px !important;
+  box-shadow: var(--tactile-shadow), 0 0 50px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* 9. CUSTOM LIQUID SCROLLBAR STYLING */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  border: 3px solid var(--bg-void);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-biolum-coral);
 }
