@@ -38,6 +38,10 @@ const buildPath = path.resolve(__dirname, "../../frontend/build");
 app.use(express.static(buildPath));
 
 // 2. API Routes
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
+
 app.use("/api/v1/users", userRoutes);
 app.use("/api/meeting", meetingRoutes);
 

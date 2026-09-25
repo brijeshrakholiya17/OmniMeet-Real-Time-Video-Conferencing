@@ -80,11 +80,19 @@ html {
   scroll-behavior: smooth;
   background-color: var(--bg-void);
   color-scheme: dark;
-}
-
-body {
+  height: 100dvh;
+  width: 100vw;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+}
+
+body, #root, .App {
+  height: 100dvh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
   font-family: var(--font-body);
   background-color: var(--bg-void);
   background-image: 
@@ -96,8 +104,6 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  min-height: 100vh;
   position: relative;
 }
 
