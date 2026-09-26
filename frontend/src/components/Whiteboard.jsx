@@ -1,14 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Paper, IconButton, Slider, Tooltip, Divider, Box, Typography, useMediaQuery, Popover, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
+import { 
+    Paper, IconButton, Slider, Tooltip, Divider, Box, Typography, 
+    useMediaQuery, Popover, Dialog, DialogTitle, DialogContent, 
+    DialogContentText, DialogActions, Button 
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import BrushIcon from '@mui/icons-material/Brush';
 import UndoIcon from '@mui/icons-material/Undo';
 import CloseIcon from '@mui/icons-material/Close';
+import TuneIcon from '@mui/icons-material/Tune';
 
-// Custom SVG Icons for Drawing Tools
+// Custom SVG Icons for Tools
 const PenToolIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 19l7-7 3 3-7 7-3-3z" />
         <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
         <path d="M2 2l7.5 7.5" />
@@ -16,36 +21,36 @@ const PenToolIcon = () => (
 );
 
 const LineToolIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
         <line x1="4" y1="20" x2="20" y2="4" />
     </svg>
 );
 
 const RectToolIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
         <rect x="4" y="4" width="16" height="16" rx="3" />
     </svg>
 );
 
 const CircleToolIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
         <circle cx="12" cy="12" r="8.5" />
     </svg>
 );
 
 const EraserToolIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M16.24 7.56l4.24 4.24c.78.78.78 2.05 0 2.83L13.59 21H21v-2h-3.59l4.24-4.24c1.56-1.56 1.56-4.09 0-5.66l-5.66-5.66c-1.56-1.56-4.09-1.56-5.66 0L2.24 12.03c-.78.78-.78 2.05 0 2.83L6.5 19.1c.78.78 2.05.78 2.83 0l6.91-6.91-2.83-2.83-6.91 6.91-2.83-2.83 7.07-7.07c1.56-1.56 4.09-1.56 5.66 0z" />
     </svg>
 );
 
 const RedoToolIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/>
     </svg>
 );
 
-const PRESET_COLORS = ['#FF453A', '#00F2FE', '#00F5D4', '#FFD166', '#7B2CBF', '#FFFFFF', '#000000'];
+const PRESET_COLORS = ['#FF453A', '#0284C7', '#10B981', '#F59E0B', '#8B5CF6', '#0F172A', '#64748B'];
 
 export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded, onClearBoard, onUndo, onClose }) {
     const canvasRef = useRef(null);
@@ -54,40 +59,42 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
     const lastPosRef = useRef({ x: 0, y: 0 });
     const startPosRef = useRef({ x: 0, y: 0 });
     const currentPosRef = useRef({ x: 0, y: 0 });
+    const currentStrokeIdRef = useRef(null);
 
     const [isDrawing, setIsDrawing] = useState(false);
     const [activeTool, setActiveTool] = useState('pen'); // 'pen', 'line', 'rectangle', 'circle', 'eraser'
     const [color, setColor] = useState('#FF453A');
-    const [brushSize, setBrushSize] = useState(5);
-    const [eraserSize, setEraserSize] = useState(25);
+    const [brushSize, setBrushSize] = useState(4);
+    const [eraserSize, setEraserSize] = useState(24);
     const [isEraser, setIsEraser] = useState(false);
     const [brushType, setBrushType] = useState('solid'); // 'solid', 'highlighter', 'dashed'
     const [localHistory, setLocalHistory] = useState(initialHistory || []);
     const [redoStack, setRedoStack] = useState([]);
     const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
-    // Mobile popovers anchor states
+    // Mobile floating tools box visibility
+    const [isToolsOpenMobile, setIsToolsOpenMobile] = useState(true);
+
+    // Responsive tool popovers
     const [colorAnchor, setColorAnchor] = useState(null);
     const [sizeAnchor, setSizeAnchor] = useState(null);
 
     const isMobile = useMediaQuery('(max-width: 768px)');
 
-    // Sync ref with state so ResizeObserver can access the latest state without observer re-registration
     const localHistoryRef = useRef(localHistory);
     useEffect(() => {
         localHistoryRef.current = localHistory;
     }, [localHistory]);
 
-    // Keep state in sync with parent updates
     useEffect(() => {
         setLocalHistory(initialHistory || []);
     }, [initialHistory]);
 
-    // Helper to draw physical normalized shapes with composite operation support
+    // Draw single normalized stroke/segment on canvas
     const drawNormalizedShape = (stroke) => {
         const canvas = canvasRef.current;
         const ctx = contextRef.current;
-        if (!canvas || !ctx) return;
+        if (!canvas || !ctx || !stroke) return;
 
         const dpr = window.devicePixelRatio || 1;
         const width = canvas.clientWidth || (canvas.width / dpr);
@@ -111,19 +118,19 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
             ctx.strokeStyle = stroke.color || '#FF453A';
         }
 
-        ctx.lineWidth = Math.max(1, size);
+        ctx.lineWidth = Math.max(1.5, size);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
         if (stroke.brushType === 'highlighter' && tool !== 'eraser') {
-            ctx.globalAlpha = 0.4;
+            ctx.globalAlpha = 0.35;
         } else {
             ctx.globalAlpha = 1.0;
         }
 
         if (stroke.brushType === 'dashed' && tool !== 'eraser') {
-            const dashScale = width / 1920;
-            ctx.setLineDash([10 * dashScale, 15 * dashScale]);
+            const dashScale = Math.max(1, width / 1200);
+            ctx.setLineDash([8 * dashScale, 10 * dashScale]);
         } else {
             ctx.setLineDash([]);
         }
@@ -141,7 +148,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
             ctx.arc(x0, y0, radius, 0, 2 * Math.PI);
             ctx.stroke();
         } else {
-            // Pen / Eraser freehand curve
+            // Pen / Eraser smooth curve
             ctx.moveTo(x0, y0);
             if (stroke.cx !== undefined && stroke.cy !== undefined) {
                 ctx.quadraticCurveTo(stroke.cx * width, stroke.cy * height, x1, y1);
@@ -158,21 +165,21 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         ctx.globalCompositeOperation = 'source-over';
     };
 
-    // Redraw complete history cache
-    const redrawHistory = () => {
+    // Redraw entire history buffer
+    const redrawHistory = (historyToDraw = null) => {
         const canvas = canvasRef.current;
         const ctx = contextRef.current;
         if (!canvas || !ctx) return;
 
         const dpr = window.devicePixelRatio || 1;
         ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-        const historyToDraw = localHistoryRef.current || [];
-        historyToDraw.forEach(stroke => {
+        const list = historyToDraw || localHistoryRef.current || [];
+        list.forEach(stroke => {
             drawNormalizedShape(stroke);
         });
     };
 
-    // Attach ResizeObserver to canvas parent container to adjust resolution dynamically with High-DPI scaling
+    // ResizeObserver for dynamic High-DPI canvas
     useEffect(() => {
         const container = containerRef.current;
         const canvas = canvasRef.current;
@@ -181,6 +188,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         const resizeObserver = new ResizeObserver((entries) => {
             for (let entry of entries) {
                 const { width, height } = entry.contentRect;
+                if (width === 0 || height === 0) return;
                 const dpr = window.devicePixelRatio || 1;
 
                 canvas.width = Math.floor(width * dpr);
@@ -205,7 +213,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         };
     }, []);
 
-    // Socket listeners for real-time syncing
+    // Socket sync listeners
     useEffect(() => {
         if (!socket) return;
 
@@ -224,15 +232,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
             try {
                 setLocalHistory(state);
                 setRedoStack([]);
-                const canvas = canvasRef.current;
-                const ctx = contextRef.current;
-                if (canvas && ctx) {
-                    const dpr = window.devicePixelRatio || 1;
-                    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-                    state.forEach(stroke => {
-                        drawNormalizedShape(stroke);
-                    });
-                }
+                redrawHistory(state);
             } catch (err) {
                 console.warn("Whiteboard state sync suppressed:", err);
             }
@@ -264,7 +264,6 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         };
     }, [socket]);
 
-    // Drawing coordinates resolver
     const getPhysicalCoordinates = (e) => {
         const canvas = canvasRef.current;
         if (!canvas) return { x: 0, y: 0 };
@@ -275,13 +274,14 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         };
     };
 
-    // Drawing Trigger Methods
+    // Starting a new atomic stroke gesture
     const startDrawing = (e) => {
         const { x, y } = getPhysicalCoordinates(e);
         setIsDrawing(true);
         lastPosRef.current = { x, y };
         startPosRef.current = { x, y };
         currentPosRef.current = { x, y };
+        currentStrokeIdRef.current = 'strk_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
     };
 
     const draw = (e) => {
@@ -300,6 +300,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         if (activeTool === 'line' || activeTool === 'rectangle' || activeTool === 'circle') {
             redrawHistory();
             const strokePreview = {
+                strokeId: currentStrokeIdRef.current,
                 tool: activeTool,
                 x0: startPosRef.current.x / width,
                 y0: startPosRef.current.y / height,
@@ -320,6 +321,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         const midY = (y0 + y) / 2;
 
         const strokeData = {
+            strokeId: currentStrokeIdRef.current,
             tool: activeTool,
             x0: x0 / width,
             y0: y0 / height,
@@ -354,6 +356,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
             const activeSize = isEraser ? eraserSize : brushSize;
 
             const strokeData = {
+                strokeId: currentStrokeIdRef.current,
                 tool: activeTool,
                 x0: startPosRef.current.x / width,
                 y0: startPosRef.current.y / height,
@@ -384,6 +387,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
             lastPosRef.current = { x, y };
             startPosRef.current = { x, y };
             currentPosRef.current = { x, y };
+            currentStrokeIdRef.current = 'strk_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
         }
     };
 
@@ -406,6 +410,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         if (activeTool === 'line' || activeTool === 'rectangle' || activeTool === 'circle') {
             redrawHistory();
             const strokePreview = {
+                strokeId: currentStrokeIdRef.current,
                 tool: activeTool,
                 x0: startPosRef.current.x / width,
                 y0: startPosRef.current.y / height,
@@ -426,6 +431,7 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         const midY = (y0 + y) / 2;
 
         const strokeData = {
+            strokeId: currentStrokeIdRef.current,
             tool: activeTool,
             x0: x0 / width,
             y0: y0 / height,
@@ -449,6 +455,55 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         lastPosRef.current = { x: midX, y: midY };
     };
 
+    // ATOMIC FULL STROKE UNDO
+    const handleUndo = () => {
+        if (localHistory.length === 0) return;
+
+        const lastItem = localHistory[localHistory.length - 1];
+        let remainingHistory = [];
+        let poppedGroup = [];
+
+        if (lastItem && lastItem.strokeId) {
+            const targetStrokeId = lastItem.strokeId;
+            let splitIndex = localHistory.length - 1;
+            while (splitIndex >= 0 && localHistory[splitIndex].strokeId === targetStrokeId) {
+                splitIndex--;
+            }
+            remainingHistory = localHistory.slice(0, splitIndex + 1);
+            poppedGroup = localHistory.slice(splitIndex + 1);
+        } else {
+            remainingHistory = localHistory.slice(0, -1);
+            poppedGroup = [lastItem];
+        }
+
+        setRedoStack(prev => [...prev, poppedGroup]);
+        setLocalHistory(remainingHistory);
+        redrawHistory(remainingHistory);
+
+        if (socket) {
+            socket.emit('whiteboard-sync-full', remainingHistory);
+        }
+        if (onUndo) onUndo(remainingHistory);
+    };
+
+    // ATOMIC FULL STROKE REDO
+    const handleRedo = () => {
+        if (redoStack.length === 0) return;
+
+        const newRedoStack = [...redoStack];
+        const itemsToRestore = newRedoStack.pop();
+        const restoredArray = Array.isArray(itemsToRestore) ? itemsToRestore : [itemsToRestore];
+
+        const newHistory = [...localHistory, ...restoredArray];
+        setRedoStack(newRedoStack);
+        setLocalHistory(newHistory);
+        redrawHistory(newHistory);
+
+        if (socket) {
+            socket.emit('whiteboard-sync-full', newHistory);
+        }
+    };
+
     const handleClear = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -463,67 +518,23 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         if (onClearBoard) onClearBoard();
     };
 
-    const handleUndo = () => {
-        if (localHistory.length === 0) return;
-        const newHistory = [...localHistory];
-        const poppedStroke = newHistory.pop();
-        setRedoStack(prev => [...prev, poppedStroke]);
-        setLocalHistory(newHistory);
-
-        const canvas = canvasRef.current;
-        const ctx = contextRef.current;
-        if (canvas && ctx) {
-            const dpr = window.devicePixelRatio || 1;
-            ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-            newHistory.forEach(stroke => {
-                drawNormalizedShape(stroke);
-            });
-        }
-
-        if (socket) socket.emit('whiteboard-sync-full', newHistory);
-        if (onUndo) onUndo(newHistory);
-    };
-
-    const handleRedo = () => {
-        if (redoStack.length === 0) return;
-        const newRedoStack = [...redoStack];
-        const strokeToRedo = newRedoStack.pop();
-        setRedoStack(newRedoStack);
-
-        const updatedHistory = [...localHistory, strokeToRedo];
-        setLocalHistory(updatedHistory);
-
-        const canvas = canvasRef.current;
-        const ctx = contextRef.current;
-        if (canvas && ctx) {
-            drawNormalizedShape(strokeToRedo);
-        }
-
-        if (socket) {
-            socket.emit('whiteboard-stroke', strokeToRedo);
-            socket.emit('whiteboard-sync-full', updatedHistory);
-        }
-    };
-
-    const exportPNG = () => {
+    const handleDownload = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        const tempCtx = tempCanvas.getContext('2d');
-
-        tempCtx.fillStyle = '#ffffff';
-        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        tempCtx.drawImage(canvas, 0, 0);
+        
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = canvas.width;
+        exportCanvas.height = canvas.height;
+        const expCtx = exportCanvas.getContext('2d');
+        
+        expCtx.fillStyle = '#FFFFFF';
+        expCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+        expCtx.drawImage(canvas, 0, 0);
 
         const link = document.createElement('a');
-        link.download = `whiteboard-${new Date().getTime()}.png`;
-        link.href = tempCanvas.toDataURL('image/png');
-        document.body.appendChild(link);
+        link.download = `OmniMeet-Whiteboard-${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = exportCanvas.toDataURL('image/png');
         link.click();
-        document.body.removeChild(link);
     };
 
     const selectTool = (toolName) => {
@@ -535,466 +546,416 @@ export default function Whiteboard({ socket, room, initialHistory, onStrokeAdded
         }
     };
 
-    const activeSize = isEraser ? eraserSize : brushSize;
-
     return (
-        <Box sx={{
-            position: 'relative',
-            flex: 1,
-            minHeight: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#121212',
-            padding: isMobile ? '8px' : '20px',
-            boxSizing: 'border-box',
-            overflow: 'hidden',
-            touchAction: 'none'
-        }}>
-            {/* Top Bar Close Action Button */}
-            <Box sx={{
-                position: 'absolute',
-                top: isMobile ? '12px' : '20px',
-                right: isMobile ? '12px' : '20px',
-                zIndex: 70,
-                pointerEvents: 'none'
-            }}>
-                <IconButton
-                    onClick={onClose}
-                    sx={{
-                        pointerEvents: 'auto',
-                        backgroundColor: 'rgba(28, 28, 30, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        color: 'white',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                        minWidth: 44,
-                        minHeight: 44,
-                        '&:hover': { backgroundColor: '#EB5545', color: 'white' }
-                    }}
-                >
-                    <CloseIcon />
-                </IconButton>
-            </Box>
-
-            {/* ResizeObserver Canvas parent container */}
-            <Box ref={containerRef} sx={{
-                position: 'relative',
+        <Box 
+            ref={containerRef}
+            sx={{
                 width: '100%',
                 height: '100%',
-                backgroundColor: '#ffffff',
-                borderRadius: '20px',
+                position: 'relative',
+                backgroundColor: '#FAFCFF',
+                backgroundImage: 'radial-gradient(#E2E8F0 1.5px, transparent 1.5px)',
+                backgroundSize: '24px 24px',
+                borderRadius: { xs: '16px', md: '24px' },
                 overflow: 'hidden',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                boxShadow: '0 20px 50px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.9)',
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                touchAction: 'none'
-            }}>
-                <canvas
-                    ref={canvasRef}
-                    onMouseDown={startDrawing}
-                    onMouseMove={draw}
-                    onMouseUp={stopDrawing}
-                    onMouseLeave={stopDrawing}
-                    onTouchStart={startDrawingTouch}
-                    onTouchMove={drawTouch}
-                    onTouchEnd={stopDrawing}
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'block',
-                        cursor: activeTool === 'eraser' ? 'cell' : 'crosshair',
-                        touchAction: 'none'
-                    }}
-                />
-
-                {/* Floating Glassmorphism Toolbar Container */}
-                <Paper
-                    elevation={12}
+                flexDirection: 'column'
+            }}
+        >
+            {/* FLOATING TOOLS PANEL (Desktop: Pill / Mobile: Responsive Adaptive Grid Box with Collapse) */}
+            {isMobile && !isToolsOpenMobile ? (
+                <Button
+                    onClick={() => setIsToolsOpenMobile(true)}
+                    variant="contained"
+                    startIcon={<TuneIcon />}
                     sx={{
                         position: 'absolute',
-                        bottom: isMobile ? '14px' : '24px',
+                        top: '12px',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        zIndex: 60,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: isMobile ? '4px' : '10px',
-                        padding: isMobile ? '6px 10px' : '8px 18px',
-                        borderRadius: '32px',
-                        backgroundColor: 'rgba(18, 24, 36, 0.88)',
-                        backdropFilter: 'blur(20px) saturate(180%)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.15)',
-                        maxWidth: isMobile ? '96vw' : '90vw',
-                        overflowX: isMobile ? 'auto' : 'visible',
-                        whiteSpace: 'nowrap',
-                        '&::-webkit-scrollbar': { display: 'none' }
+                        zIndex: 100,
+                        backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                        backdropFilter: 'blur(20px)',
+                        color: '#0F172A',
+                        borderRadius: '50px',
+                        border: '1px solid #E2E8F0',
+                        boxShadow: '0 10px 25px rgba(15, 23, 42, 0.12)',
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        '&:hover': { backgroundColor: '#FFFFFF' }
                     }}
                 >
-                    {/* Tool Selectors */}
-                    <Tooltip title="Freehand Pen" placement="top">
-                        <IconButton
+                    Show Tools
+                </Button>
+            ) : (
+                <Paper
+                    elevation={0}
+                    sx={{
+                        position: 'absolute',
+                        top: { xs: '12px', sm: '16px' },
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 100,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexWrap: isMobile ? 'wrap' : 'nowrap',
+                        gap: { xs: 0.8, sm: 1 },
+                        padding: { xs: '10px 14px', sm: '8px 18px' },
+                        backgroundColor: 'rgba(255, 255, 255, 0.96)',
+                        backdropFilter: 'blur(24px)',
+                        WebkitBackdropFilter: 'blur(24px)',
+                        border: '1px solid rgba(226, 232, 240, 0.95)',
+                        borderRadius: isMobile ? '22px' : '50px',
+                        boxShadow: '0 12px 35px -5px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.9)',
+                        width: isMobile ? '90%' : 'auto',
+                        maxWidth: isMobile ? '380px' : '96%',
+                        height: 'auto',
+                        boxSizing: 'border-box'
+                    }}
+                >
+                    {/* TOOL SELECTORS */}
+                    <Tooltip title="Pen Tool (P)">
+                        <IconButton 
+                            size="small" 
                             onClick={() => selectTool('pen')}
                             sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: activeTool === 'pen' ? '#FF453A' : 'rgba(255, 255, 255, 0.75)',
-                                backgroundColor: activeTool === 'pen' ? 'rgba(255, 69, 58, 0.18)' : 'transparent',
-                                border: activeTool === 'pen' ? '1px solid rgba(255, 69, 58, 0.4)' : '1px solid transparent',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                                color: activeTool === 'pen' && !isEraser ? '#FFFFFF' : '#475569',
+                                backgroundColor: activeTool === 'pen' && !isEraser ? '#0F172A' : 'transparent',
+                                borderRadius: '50%',
+                                p: { xs: 0.9, sm: 1 },
+                                transition: 'all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                                '&:hover': {
+                                    backgroundColor: activeTool === 'pen' && !isEraser ? '#1E293B' : 'rgba(241, 245, 249, 0.9)',
+                                    transform: 'scale(1.05)'
+                                }
                             }}
                         >
                             <PenToolIcon />
                         </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Line Tool" placement="top">
-                        <IconButton
+                    <Tooltip title="Line Tool (L)">
+                        <IconButton 
+                            size="small" 
                             onClick={() => selectTool('line')}
                             sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: activeTool === 'line' ? '#00F2FE' : 'rgba(255, 255, 255, 0.75)',
-                                backgroundColor: activeTool === 'line' ? 'rgba(0, 242, 254, 0.18)' : 'transparent',
-                                border: activeTool === 'line' ? '1px solid rgba(0, 242, 254, 0.4)' : '1px solid transparent',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                                color: activeTool === 'line' ? '#FFFFFF' : '#475569',
+                                backgroundColor: activeTool === 'line' ? '#0F172A' : 'transparent',
+                                borderRadius: '50%',
+                                p: { xs: 0.9, sm: 1 },
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: activeTool === 'line' ? '#1E293B' : 'rgba(241, 245, 249, 0.9)',
+                                    transform: 'scale(1.05)'
+                                }
                             }}
                         >
                             <LineToolIcon />
                         </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Rectangle Tool" placement="top">
-                        <IconButton
+                    <Tooltip title="Rectangle (R)">
+                        <IconButton 
+                            size="small" 
                             onClick={() => selectTool('rectangle')}
                             sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: activeTool === 'rectangle' ? '#00F5D4' : 'rgba(255, 255, 255, 0.75)',
-                                backgroundColor: activeTool === 'rectangle' ? 'rgba(0, 245, 212, 0.18)' : 'transparent',
-                                border: activeTool === 'rectangle' ? '1px solid rgba(0, 245, 212, 0.4)' : '1px solid transparent',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                                color: activeTool === 'rectangle' ? '#FFFFFF' : '#475569',
+                                backgroundColor: activeTool === 'rectangle' ? '#0F172A' : 'transparent',
+                                borderRadius: '50%',
+                                p: { xs: 0.9, sm: 1 },
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: activeTool === 'rectangle' ? '#1E293B' : 'rgba(241, 245, 249, 0.9)',
+                                    transform: 'scale(1.05)'
+                                }
                             }}
                         >
                             <RectToolIcon />
                         </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Circle Tool" placement="top">
-                        <IconButton
+                    <Tooltip title="Circle (C)">
+                        <IconButton 
+                            size="small" 
                             onClick={() => selectTool('circle')}
                             sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: activeTool === 'circle' ? '#FFD166' : 'rgba(255, 255, 255, 0.75)',
-                                backgroundColor: activeTool === 'circle' ? 'rgba(255, 209, 102, 0.18)' : 'transparent',
-                                border: activeTool === 'circle' ? '1px solid rgba(255, 209, 102, 0.4)' : '1px solid transparent',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                                color: activeTool === 'circle' ? '#FFFFFF' : '#475569',
+                                backgroundColor: activeTool === 'circle' ? '#0F172A' : 'transparent',
+                                borderRadius: '50%',
+                                p: { xs: 0.9, sm: 1 },
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: activeTool === 'circle' ? '#1E293B' : 'rgba(241, 245, 249, 0.9)',
+                                    transform: 'scale(1.05)'
+                                }
                             }}
                         >
                             <CircleToolIcon />
                         </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Eraser Tool" placement="top">
-                        <IconButton
+                    <Tooltip title="Precision Eraser (E)">
+                        <IconButton 
+                            size="small" 
                             onClick={() => selectTool('eraser')}
                             sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: activeTool === 'eraser' ? '#FF453A' : 'rgba(255, 255, 255, 0.75)',
-                                backgroundColor: activeTool === 'eraser' ? 'rgba(255, 69, 58, 0.18)' : 'transparent',
-                                border: activeTool === 'eraser' ? '1px solid rgba(255, 69, 58, 0.4)' : '1px solid transparent',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                                color: isEraser ? '#FFFFFF' : '#475569',
+                                backgroundColor: isEraser ? '#FF453A' : 'transparent',
+                                borderRadius: '50%',
+                                p: { xs: 0.9, sm: 1 },
+                                boxShadow: isEraser ? '0 4px 12px rgba(255, 69, 58, 0.35)' : 'none',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: isEraser ? '#E0382E' : 'rgba(241, 245, 249, 0.9)',
+                                    transform: 'scale(1.05)'
+                                }
                             }}
                         >
                             <EraserToolIcon />
                         </IconButton>
                     </Tooltip>
 
-                    <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', height: '24px', alignSelf: 'center', mx: 0.5 }} />
+                    <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.2, sm: 0.6 }, borderColor: 'rgba(226, 232, 240, 0.9)' }} />
 
-                    {/* Color Picker & Palette */}
+                    {/* COLOR PALETTE */}
                     {!isMobile ? (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             {PRESET_COLORS.map(c => (
                                 <Box
                                     key={c}
-                                    onClick={() => { setColor(c); if (activeTool === 'eraser') setActiveTool('pen'); }}
+                                    onClick={() => { setColor(c); setIsEraser(false); if(activeTool === 'eraser') setActiveTool('pen'); }}
                                     sx={{
-                                        width: '22px',
-                                        height: '22px',
+                                        width: color === c && !isEraser ? 22 : 18,
+                                        height: color === c && !isEraser ? 22 : 18,
                                         borderRadius: '50%',
                                         backgroundColor: c,
                                         cursor: 'pointer',
-                                        border: color === c && activeTool !== 'eraser' ? '2px solid #ffffff' : '1px solid rgba(255,255,255,0.2)',
-                                        boxShadow: color === c && activeTool !== 'eraser' ? '0 0 8px ' + c : 'none',
-                                        transition: 'transform 0.2s',
-                                        '&:hover': { transform: 'scale(1.15)' }
+                                        border: color === c && !isEraser ? '2.5px solid #0F172A' : '1.5px solid rgba(0,0,0,0.1)',
+                                        transform: color === c && !isEraser ? 'scale(1.15)' : 'scale(1)',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: color === c && !isEraser ? '0 2px 8px rgba(0,0,0,0.2)' : 'none'
                                     }}
                                 />
                             ))}
-                            <Box sx={{ position: 'relative', width: '22px', height: '22px', borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer' }}>
-                                <input
-                                    type="color"
-                                    value={color}
-                                    onChange={(e) => { setColor(e.target.value); if (activeTool === 'eraser') setActiveTool('pen'); }}
-                                    style={{ position: 'absolute', top: '-5px', left: '-5px', width: '32px', height: '32px', border: 'none', cursor: 'pointer', background: 'transparent' }}
-                                />
-                            </Box>
                         </Box>
                     ) : (
-                        <Tooltip title="Color Palette" placement="top">
-                            <IconButton
+                        <Tooltip title="Palette">
+                            <IconButton 
+                                size="small" 
                                 onClick={(e) => setColorAnchor(e.currentTarget)}
-                                sx={{
-                                    minWidth: 44,
-                                    minHeight: 44,
-                                    color: color,
-                                    borderRadius: '16px',
-                                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
-                                }}
+                                sx={{ p: 0.9 }}
                             >
-                                <Box sx={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: color, border: '2px solid #ffffff' }} />
+                                <Box sx={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: isEraser ? '#cbd5e1' : color, border: '2px solid #0f172a' }} />
                             </IconButton>
                         </Tooltip>
                     )}
 
-                    {/* Popover for Mobile Color Selection */}
+                    {/* Mobile Color Popover */}
                     <Popover
                         open={Boolean(colorAnchor)}
                         anchorEl={colorAnchor}
                         onClose={() => setColorAnchor(null)}
-                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                        transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
                         PaperProps={{
-                            sx: {
-                                padding: '12px',
-                                borderRadius: '20px',
-                                backgroundColor: 'rgba(20, 24, 33, 0.95)',
-                                backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.15)',
-                                display: 'flex',
-                                gap: '8px',
-                                alignItems: 'center'
-                            }
+                            sx: { p: 1.5, borderRadius: '18px', display: 'flex', gap: 1, backgroundColor: 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)', boxShadow: '0 15px 40px rgba(0,0,0,0.15)' }
                         }}
                     >
                         {PRESET_COLORS.map(c => (
                             <Box
                                 key={c}
-                                onClick={() => { setColor(c); if (activeTool === 'eraser') setActiveTool('pen'); setColorAnchor(null); }}
+                                onClick={() => { setColor(c); setIsEraser(false); if(activeTool === 'eraser') setActiveTool('pen'); setColorAnchor(null); }}
                                 sx={{
-                                    width: '28px',
-                                    height: '28px',
+                                    width: 26,
+                                    height: 26,
                                     borderRadius: '50%',
                                     backgroundColor: c,
                                     cursor: 'pointer',
-                                    border: color === c ? '2px solid #ffffff' : '1px solid rgba(255,255,255,0.2)',
-                                    boxShadow: color === c ? '0 0 10px ' + c : 'none'
+                                    border: color === c && !isEraser ? '3px solid #0F172A' : '1px solid rgba(0,0,0,0.1)'
                                 }}
                             />
                         ))}
-                        <Box sx={{ position: 'relative', width: '28px', height: '28px', borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer' }}>
-                            <input
-                                type="color"
-                                value={color}
-                                onChange={(e) => { setColor(e.target.value); if (activeTool === 'eraser') setActiveTool('pen'); }}
-                                style={{ position: 'absolute', top: '-5px', left: '-5px', width: '38px', height: '38px', border: 'none', cursor: 'pointer', background: 'transparent' }}
-                            />
-                        </Box>
                     </Popover>
 
-                    <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', height: '24px', alignSelf: 'center', mx: 0.5 }} />
+                    <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.2, sm: 0.6 }, borderColor: 'rgba(226, 232, 240, 0.9)' }} />
 
-                    {/* Stroke Width Slider / Popover */}
+                    {/* STROKE SIZE / SLIDER */}
                     {!isMobile ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100px', px: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: 85 }}>
                             <Slider
                                 size="small"
-                                value={activeSize}
-                                onChange={(e, val) => isEraser ? setEraserSize(val) : setBrushSize(val)}
                                 min={1}
-                                max={isEraser ? 100 : 30}
+                                max={isEraser ? 60 : 25}
+                                value={isEraser ? eraserSize : brushSize}
+                                onChange={(e, val) => isEraser ? setEraserSize(val) : setBrushSize(val)}
                                 sx={{
-                                    color: '#FF453A',
-                                    '& .MuiSlider-thumb': {
-                                        width: 12,
-                                        height: 12,
-                                        boxShadow: '0 0 8px rgba(255, 69, 58, 0.5)'
-                                    }
+                                    color: isEraser ? '#FF453A' : '#0F172A',
+                                    '& .MuiSlider-thumb': { width: 14, height: 14, backgroundColor: '#FFFFFF', border: '2px solid currentColor' }
                                 }}
                             />
                         </Box>
                     ) : (
-                        <Tooltip title="Stroke Width" placement="top">
-                            <IconButton
-                                onClick={(e) => setSizeAnchor(e.currentTarget)}
-                                sx={{
-                                    minWidth: 44,
-                                    minHeight: 44,
-                                    color: 'white',
-                                    borderRadius: '16px',
-                                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
-                                }}
-                            >
+                        <Tooltip title="Stroke Width">
+                            <IconButton size="small" onClick={(e) => setSizeAnchor(e.currentTarget)} sx={{ p: 0.9, color: '#475569' }}>
                                 <BrushIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}
 
-                    {/* Popover for Mobile Stroke Width */}
+                    {/* Mobile Size Popover */}
                     <Popover
                         open={Boolean(sizeAnchor)}
                         anchorEl={sizeAnchor}
                         onClose={() => setSizeAnchor(null)}
-                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                        transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                        PaperProps={{
-                            sx: {
-                                padding: '16px 20px',
-                                borderRadius: '20px',
-                                backgroundColor: 'rgba(20, 24, 33, 0.95)',
-                                backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.15)',
-                                minWidth: '200px'
-                            }
-                        }}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                        PaperProps={{ sx: { p: 2, width: 180, borderRadius: '18px' } }}
                     >
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 'bold', display: 'block', mb: 1 }}>
-                            Stroke Width: {activeSize}px
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#475569', display: 'block', mb: 1 }}>
+                            Size: {isEraser ? eraserSize : brushSize}px
                         </Typography>
                         <Slider
                             size="small"
-                            value={activeSize}
-                            onChange={(e, val) => isEraser ? setEraserSize(val) : setBrushSize(val)}
                             min={1}
-                            max={isEraser ? 100 : 30}
-                            sx={{
-                                color: '#FF453A',
-                                '& .MuiSlider-thumb': {
-                                    width: 14,
-                                    height: 14,
-                                    boxShadow: '0 0 10px rgba(255, 69, 58, 0.5)'
-                                }
-                            }}
+                            max={isEraser ? 60 : 30}
+                            value={isEraser ? eraserSize : brushSize}
+                            onChange={(e, val) => isEraser ? setEraserSize(val) : setBrushSize(val)}
+                            sx={{ color: isEraser ? '#FF453A' : '#0F172A' }}
                         />
                     </Popover>
 
-                    <Divider orientation="vertical" flexItem sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', height: '24px', alignSelf: 'center', mx: 0.5 }} />
+                    <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.2, sm: 0.6 }, borderColor: 'rgba(226, 232, 240, 0.9)' }} />
 
-                    {/* Actions: Undo, Redo, Clear Board, Export PNG */}
-                    <Tooltip title="Undo" placement="top">
-                        <IconButton
-                            onClick={handleUndo}
-                            disabled={localHistory.length === 0}
-                            sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: localHistory.length > 0 ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.25)',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
-                            }}
-                        >
-                            <UndoIcon fontSize="small" />
-                        </IconButton>
+                    {/* ATOMIC UNDO / REDO CONTROLS */}
+                    <Tooltip title="Undo Full Stroke (Ctrl+Z)">
+                        <span>
+                            <IconButton 
+                                size="small" 
+                                onClick={handleUndo} 
+                                disabled={localHistory.length === 0}
+                                sx={{ color: '#475569', p: { xs: 0.9, sm: 1 }, '&:disabled': { opacity: 0.3 } }}
+                            >
+                                <UndoIcon fontSize="small" />
+                            </IconButton>
+                        </span>
                     </Tooltip>
 
-                    <Tooltip title="Redo" placement="top">
-                        <IconButton
-                            onClick={handleRedo}
-                            disabled={redoStack.length === 0}
-                            sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: redoStack.length > 0 ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.25)',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
-                            }}
-                        >
-                            <RedoToolIcon />
-                        </IconButton>
+                    <Tooltip title="Redo Full Stroke (Ctrl+Y)">
+                        <span>
+                            <IconButton 
+                                size="small" 
+                                onClick={handleRedo} 
+                                disabled={redoStack.length === 0}
+                                sx={{ color: '#475569', p: { xs: 0.9, sm: 1 }, '&:disabled': { opacity: 0.3 } }}
+                            >
+                                <RedoToolIcon />
+                            </IconButton>
+                        </span>
                     </Tooltip>
 
-                    <Tooltip title="Clear Board" placement="top">
-                        <IconButton
+                    <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.2, sm: 0.6 }, borderColor: 'rgba(226, 232, 240, 0.9)' }} />
+
+                    {/* CLEAR BOARD */}
+                    <Tooltip title="Clear Whiteboard">
+                        <IconButton 
+                            size="small" 
                             onClick={() => setClearDialogOpen(true)}
-                            sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: '#FF453A',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 69, 58, 0.15)' }
-                            }}
+                            sx={{ color: '#EF4444', p: { xs: 0.9, sm: 1 }, '&:hover': { backgroundColor: '#FEE2E2' } }}
                         >
                             <DeleteIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
 
-                    <Tooltip title="Export PNG" placement="top">
-                        <IconButton
-                            onClick={exportPNG}
-                            sx={{
-                                minWidth: 44,
-                                minHeight: 44,
-                                color: 'rgba(255, 255, 255, 0.85)',
-                                borderRadius: '16px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
-                            }}
+                    {/* EXPORT PNG */}
+                    <Tooltip title="Export High-Res PNG">
+                        <IconButton 
+                            size="small" 
+                            onClick={handleDownload}
+                            sx={{ color: '#0284C7', p: { xs: 0.9, sm: 1 }, '&:hover': { backgroundColor: '#E0F2FE' } }}
                         >
                             <DownloadIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
-                </Paper>
-            </Box>
 
-            {/* Clear Board Safeguard Confirmation Dialog */}
+                    {/* Mobile Collapse Button */}
+                    {isMobile && (
+                        <Tooltip title="Minimize Tools Panel">
+                            <IconButton 
+                                size="small" 
+                                onClick={() => setIsToolsOpenMobile(false)}
+                                sx={{ color: '#64748B', p: 0.9, '&:hover': { backgroundColor: '#F1F5F9' } }}
+                            >
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                </Paper>
+            )}
+
+            {/* HIGH RESOLUTION VECTOR CANVAS */}
+            <canvas
+                ref={canvasRef}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawingTouch}
+                onTouchMove={drawTouch}
+                onTouchEnd={stopDrawing}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    touchAction: 'none',
+                    cursor: isEraser ? 'crosshair' : activeTool === 'pen' ? 'crosshair' : 'default',
+                    display: 'block'
+                }}
+            />
+
+            {/* CLEAR CONFIRMATION DIALOG */}
             <Dialog
                 open={clearDialogOpen}
                 onClose={() => setClearDialogOpen(false)}
                 PaperProps={{
                     sx: {
-                        backgroundColor: 'rgba(20, 24, 33, 0.95)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        color: 'white',
                         borderRadius: '24px',
-                        padding: '8px'
+                        p: 1.5,
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E2E8F0',
+                        boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.15)'
                     }
                 }}
             >
-                <DialogTitle sx={{ fontFamily: 'Outfit, sans-serif', fontWeight: 'bold', color: '#FF453A' }}>
-                    Clear Whiteboard?
+                <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#0F172A' }}>
+                    Clear Whiteboard Canvas?
                 </DialogTitle>
                 <DialogContent>
-                    <DialogContentText sx={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.95rem' }}>
-                        Are you sure you want to clear the entire whiteboard? This action will erase all drawing strokes for all participants in the meeting room.
+                    <DialogContentText sx={{ color: '#64748B', fontSize: '0.95rem' }}>
+                        This will completely erase all drawing paths and shapes for everyone in the room. This action cannot be undone.
                     </DialogContentText>
                 </DialogContent>
-                <DialogActions sx={{ padding: '16px' }}>
-                    <Button onClick={() => setClearDialogOpen(false)} sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+                    <Button 
+                        onClick={() => setClearDialogOpen(false)} 
+                        sx={{ color: '#64748B', textTransform: 'none', fontWeight: 700, borderRadius: '12px' }}
+                    >
                         Cancel
                     </Button>
-                    <Button
-                        onClick={() => { handleClear(); setClearDialogOpen(false); }}
-                        variant="contained"
-                        sx={{
-                            backgroundColor: '#FF453A',
-                            '&:hover': { backgroundColor: '#ff2d21' },
+                    <Button 
+                        onClick={() => { handleClear(); setClearDialogOpen(false); }} 
+                        variant="contained" 
+                        sx={{ 
+                            backgroundColor: '#FF453A', 
+                            color: '#fff', 
+                            textTransform: 'none', 
+                            fontWeight: 800, 
                             borderRadius: '12px',
-                            fontWeight: 'bold'
+                            boxShadow: '0 4px 14px rgba(255, 69, 58, 0.4)',
+                            '&:hover': { backgroundColor: '#E0382E' }
                         }}
                     >
-                        Clear Canvas
+                        Clear Everything
                     </Button>
                 </DialogActions>
             </Dialog>

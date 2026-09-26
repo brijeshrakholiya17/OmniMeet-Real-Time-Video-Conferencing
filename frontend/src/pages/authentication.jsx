@@ -4,9 +4,12 @@ import '../styles/AuthStyles.css';
 import { AuthContext } from '../contexts/AuthContext';
 import { Snackbar, Alert, IconButton, Box, TextField, Button, Typography, CircularProgress } from '@mui/material'; 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; 
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 
 export default function Authentication() {
-    
     const { handleLogin, handleRegister } = useContext(AuthContext);
     const router = useNavigate(); 
     const location = useLocation(); 
@@ -58,16 +61,16 @@ export default function Authentication() {
         try {
             if (formState === 0) {
                 await handleLogin(username, password); 
-                setMessage("User login successfully");
+                setMessage("Login successful. Redirecting...");
                 setOpen(true);
                 setError("");
                 setTimeout(() => {
                     router("/home"); 
-                }, 1000); 
+                }, 800); 
             } 
             else if (formState === 1) {
                 await handleRegister(name, username, password);
-                setMessage("New user registered successfully");      
+                setMessage("Account registered successfully! You can now log in.");      
                 setOpen(true);            
                 setError("");             
                 setFormState(0);          
@@ -88,203 +91,158 @@ export default function Authentication() {
     };
 
     return (
-        <Box className="auth-container" style={{ position: 'relative' }}>
-            
-            {/* BACK BUTTON */}
-            <Box style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 10 }}>
-                <IconButton 
+        <div className="authContainer lightTheme">
+            {/* Ambient Pastel Glow Mesh */}
+            <div className="authGlow glowLeft"></div>
+            <div className="authGlow glowRight"></div>
+            <div className="authGridOverlay"></div>
+
+            {/* Back to Home Button */}
+            <div className="authBackWrapper">
+                <button 
                     onClick={() => router("/")} 
-                    sx={{ color: 'white', backgroundColor: 'rgba(255,255,255,0.1)', '&:hover': { backgroundColor: '#EB5545' } }}
+                    className="authBackBtn"
+                    aria-label="Back to Homepage"
                 >
-                    <ArrowBackIcon />
-                </IconButton>
-            </Box>
+                    <ArrowBackIcon fontSize="small" />
+                    <span>Back to Home</span>
+                </button>
+            </div>
 
-            <Box className="auth-card">
-                
-                <Box className="auth-header text-center" sx={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                    <Typography variant="h4" component="h2" sx={{ fontWeight: 600, fontSize: '1.8rem', color: 'white', fontFamily: '"Bricolage Grotesque", sans-serif' }}>
-                        {formState === 0 ? "Welcome Back" : "Join the Community"}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem', fontWeight: 300 }}>
-                        {formState === 0 
-                            ? "Enter your credentials to access your account" 
-                            : "Start your journey with us today"}
-                    </Typography>
-                </Box>
-
-                <Box className="btn-toggle-group">
-                    <Button 
-                        variant="text"
-                        className={`btn-toggle ${formState === 0 ? 'active' : ''}`}
-                        onClick={() => { setFormState(0); setError(""); }}
-                        sx={{ textTransform: 'none', color: 'inherit' }}
-                    >
-                        Sign In
-                    </Button>
-                    <Button 
-                        variant="text"
-                        className={`btn-toggle ${formState === 1 ? 'active' : ''}`}
-                        onClick={() => { setFormState(1); setError(""); }}
-                        sx={{ textTransform: 'none', color: 'inherit' }}
-                    >
-                        Sign Up
-                    </Button>
-                </Box>
-
-                <form onSubmit={handleAuth} noValidate>
+            {/* Main Auth Centerpiece Card */}
+            <div className="authCardWrapper">
+                <div className="authCard">
                     
-                    {formState === 1 && (
-                        <TextField
-                            label="Full Name"
-                            variant="outlined"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            fullWidth
-                            autoFocus
-                            sx={{
-                                marginBottom: '1.5rem',
-                                '& .MuiOutlinedInput-root': {
-                                    color: 'white',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                    borderRadius: '12px',
-                                    '& fieldset': {
-                                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                                    },
-                                    '&:hover fieldset': {
-                                        borderColor: 'rgba(255, 255, 255, 0.3)',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: '#EB5545',
-                                    },
-                                },
-                                '& .MuiInputLabel-root': {
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    '&.Mui-focused': {
-                                        color: 'white',
-                                    },
-                                },
-                            }}
-                        />
-                    )}
+                    {/* Brand Badge */}
+                    <div className="authBrandHeader">
+                        <div className="authBrandIcon">
+                            <VideoCallIcon className="authBrandSvg" />
+                        </div>
+                        <h2 className="authBrandTitle">OmniMeet</h2>
+                        <span className="authBrandSub">Secure Access Portal</span>
+                    </div>
 
-                    <TextField
-                        label="Username"
-                        variant="outlined"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        fullWidth
-                        sx={{
-                            marginBottom: '1.5rem',
-                            '& .MuiOutlinedInput-root': {
-                                color: 'white',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                borderRadius: '12px',
-                                '& fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#EB5545',
-                                },
-                            },
-                            '& .MuiInputLabel-root': {
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                '&.Mui-focused': {
-                                    color: 'white',
-                                },
-                            },
-                        }}
-                    />
+                    <div className="authTitleSection">
+                        <h1 className="authMainHeading">
+                            {formState === 0 ? "Welcome Back" : "Create Account"}
+                        </h1>
+                        <p className="authSubHeading">
+                            {formState === 0 
+                                ? "Enter your credentials to enter your conference hub" 
+                                : "Join the next-generation video conferencing mesh"}
+                        </p>
+                    </div>
 
-                    <TextField
-                        label="Password"
-                        type="password"
-                        variant="outlined"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        fullWidth
-                        sx={{
-                            marginBottom: '1.5rem',
-                            '& .MuiOutlinedInput-root': {
-                                color: 'white',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                borderRadius: '12px',
-                                '& fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#EB5545',
-                                },
-                            },
-                            '& .MuiInputLabel-root': {
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                '&.Mui-focused': {
-                                    color: 'white',
-                                },
-                            },
-                        }}
-                    />
-
-                    {error && (
-                        <Alert 
-                            severity="error" 
-                            sx={{ 
-                                marginBottom: '1.5rem', 
-                                backgroundColor: 'rgba(220, 53, 69, 0.2)', 
-                                color: '#ff6b6b', 
-                                border: 'none',
-                                '& .MuiAlert-icon': {
-                                    color: '#ff6b6b'
-                                }
-                            }}
+                    {/* Dual Mode Toggle Pill */}
+                    <div className="authToggleGroup">
+                        <button 
+                            type="button"
+                            className={`authToggleBtn ${formState === 0 ? 'active' : ''}`}
+                            onClick={() => { setFormState(0); setError(""); }}
                         >
-                            {error}
-                        </Alert>
-                    )}
+                            Sign In
+                        </button>
+                        <button 
+                            type="button"
+                            className={`authToggleBtn ${formState === 1 ? 'active' : ''}`}
+                            onClick={() => { setFormState(1); setError(""); }}
+                        >
+                            Sign Up
+                        </button>
+                    </div>
 
-                    <Button
-                        type="submit"
-                        disabled={isLoading}
-                        variant="contained"
-                        sx={{
-                            backgroundColor: '#EB5545',
-                            border: 'none',
-                            padding: '0.8rem',
-                            fontWeight: 600,
-                            fontSize: '1.1rem',
-                            borderRadius: '30px',
-                            marginTop: '1rem',
-                            width: '100%',
-                            color: 'white',
-                            textTransform: 'none',
-                            transition: 'transform 0.2s, background-color 0.2s',
-                            '&:hover': {
-                                backgroundColor: '#ff6b5b',
-                                transform: 'translateY(-2px)',
-                            },
-                        }}
-                    >
-                        {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : (formState === 0 ? "Login" : "Register")}
-                    </Button>
-                </form>
-            </Box>
+                    {/* Form Input Fields */}
+                    <form onSubmit={handleAuth} noValidate className="authForm">
+                        
+                        {formState === 1 && (
+                            <div className="formInputGroup">
+                                <label className="inputLabel">Full Name</label>
+                                <div className="inputWithIcon">
+                                    <BadgeOutlinedIcon className="fieldIcon" />
+                                    <TextField
+                                        placeholder="e.g. John Doe"
+                                        variant="standard"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        fullWidth
+                                        autoFocus
+                                        InputProps={{ disableUnderline: true }}
+                                        className="authTextField"
+                                    />
+                                </div>
+                            </div>
+                        )}
 
+                        <div className="formInputGroup">
+                            <label className="inputLabel">Username</label>
+                            <div className="inputWithIcon">
+                                <PersonOutlineOutlinedIcon className="fieldIcon" />
+                                <TextField
+                                    placeholder="Enter your username"
+                                    variant="standard"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    fullWidth
+                                    InputProps={{ disableUnderline: true }}
+                                    className="authTextField"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="formInputGroup">
+                            <label className="inputLabel">Password</label>
+                            <div className="inputWithIcon">
+                                <LockOutlinedIcon className="fieldIcon" />
+                                <TextField
+                                    placeholder="••••••••"
+                                    type="password"
+                                    variant="standard"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    fullWidth
+                                    InputProps={{ disableUnderline: true }}
+                                    className="authTextField"
+                                />
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="authErrorBanner">
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        <Button
+                            type="submit"
+                            disabled={isLoading}
+                            variant="contained"
+                            className="authSubmitBtn"
+                        >
+                            {isLoading ? (
+                                <CircularProgress size={22} sx={{ color: 'white' }} />
+                            ) : (
+                                formState === 0 ? "Sign In to Studio" : "Create My Account"
+                            )}
+                        </Button>
+                    </form>
+
+                    <div className="authFooterNote">
+                        <span>Protected by end-to-end P2P encryption</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Notification Snackbar */}
             <Snackbar
                 open={open}
                 autoHideDuration={4000}
                 onClose={() => setOpen(false)}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert onClose={() => setOpen(false)} severity="success" sx={{ width: '100%' }}>
+                <Alert onClose={() => setOpen(false)} severity="success" sx={{ width: '100%', borderRadius: '14px' }}>
                     {message}
                 </Alert>
             </Snackbar>
-        </Box>
+        </div>
     );
 }

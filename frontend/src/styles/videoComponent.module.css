@@ -1,85 +1,153 @@
 /* ==========================================================================
-   OMNIMEET - VIDEO CONFERENCE MODULE STYLES (videoComponent.module.css)
+   OMNIMEET - PRECISION LIGHT THEME & 100% RESPONSIVE (videoComponent.module.css)
    ========================================================================== */
 
 /* =========================================
-   1. GLOBAL CONTAINER & LIQUID MESH STAGE
+   1. ROOT WRAPPER & LOBBY STAGE
    ========================================= */
-.meetVideoContainer {
-    position: relative;
+.meetRootContainer {
+    width: 100vw;
     height: 100vh;
     height: 100dvh;
-    width: 100vw;
-    margin: 0;
-    padding: 0;
-    flex: 1;
-    min-height: 0;
-    background-color: var(--bg-void);
-    background-image: 
-        radial-gradient(circle at 50% 0%, rgba(255, 69, 58, 0.16) 0%, transparent 65%),
-        radial-gradient(circle at 100% 100%, rgba(0, 242, 254, 0.1) 0%, transparent 55%),
-        radial-gradient(circle at 0% 100%, rgba(123, 44, 191, 0.1) 0%, transparent 55%);
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif);
     overflow: hidden;
-    font-family: var(--font-body);
-    color: var(--text-primary);
+    position: relative;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 }
 
-/* =========================================
-   2. LOBBY (PRE-JOIN ORGANIC GLASS POD)
-   ========================================= */
-.lobbyContainer {
-    height: 100vh;
-    height: 100dvh;
-    width: 100vw;
+/* Lobby Atmosphere */
+.lobbyStage {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: 
-        radial-gradient(circle at 50% 30%, rgba(255, 69, 58, 0.18) 0%, transparent 55%),
-        radial-gradient(circle at 15% 85%, rgba(0, 242, 254, 0.12) 0%, transparent 50%),
-        var(--bg-void-deep);
-    padding: 20px;
+    background: radial-gradient(circle at 15% 15%, rgba(255, 69, 58, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(2, 132, 199, 0.08) 0%, transparent 45%),
+                #FAFCFF;
+    position: relative;
+    padding: clamp(1rem, 3vw, 2.5rem);
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.lobbyGridOverlay {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.lobbyGlow1 {
+    position: fixed;
+    width: 45vw;
+    height: 45vw;
+    max-width: 500px;
+    max-height: 500px;
+    top: -10%;
+    left: 10%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 69, 58, 0.12) 0%, transparent 70%);
+    filter: blur(80px);
+    pointer-events: none;
+}
+
+.lobbyGlow2 {
+    position: fixed;
+    width: 40vw;
+    height: 40vw;
+    max-width: 450px;
+    max-height: 450px;
+    bottom: -10%;
+    right: 5%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, transparent 70%);
+    filter: blur(80px);
+    pointer-events: none;
+}
+
+/* Two-Panel Lobby Hub */
+.lobbyMainHub {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: clamp(1.2rem, 3vw, 2.5rem);
+    width: 100%;
+    max-width: 1040px;
+    z-index: 2;
     box-sizing: border-box;
 }
 
-.lobbyCard {
-    background: var(--glass-bg-elevated);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    padding: 3rem 2.8rem;
-    border-radius: 36px;
-    text-align: center;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: var(--tactile-shadow), 0 35px 70px rgba(0, 0, 0, 0.9);
+/* Left Camera Preview Side */
+.lobbyPreviewSide {
+    flex: 1.25;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 32px;
+    padding: clamp(16px, 2.5vw, 22px);
     display: flex;
     flex-direction: column;
-    gap: 1.3rem;
-    animation: fadeIn 0.5s var(--ease-organic);
+    gap: 14px;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
 }
 
-.lobbyCard h2 {
-    font-family: var(--font-heading);
-    font-size: 2.2rem;
-    font-weight: 900;
-    margin-bottom: 0.4rem;
-    color: var(--text-primary);
-    letter-spacing: -0.03em;
+.previewHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
 }
 
-.lobbyVideoContainer {
+.previewLivePill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #475569;
+}
+
+.pulseGreenDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10B981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+.previewRes {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0284C7;
+    background: rgba(2, 132, 199, 0.08);
+    border: 1px solid rgba(2, 132, 199, 0.2);
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+.lobbyVideoFrame {
     position: relative;
     width: 100%;
     aspect-ratio: 16/9;
-    height: auto;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 24px;
+    background: #0B0F19;
+    border-radius: 22px;
     overflow: hidden;
-    border: 1px solid var(--glass-border);
-    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4);
 }
 
 .lobbyVideoPreview {
@@ -89,404 +157,251 @@
     transform: scaleX(-1);
 }
 
-.lobbyControls {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 5px;
-    align-items: center;
-}
-
-/* =========================================
-   3. MAIN CONFERENCE STAGE & MORPHING GRID
-   ========================================= */
-.conferenceView {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    min-height: 0;
-    height: 100%;
-    width: 100%;
-    padding: 26px;
-    padding-bottom: 120px;
-    gap: 20px;
-    overflow-y: auto;
-    box-sizing: border-box;
-}
-
-.remoteVideoContainer {
-    position: relative;
-    flex: 1 1 420px;
-    max-width: 1200px;
-    aspect-ratio: 16/9;
-    background: rgba(16, 22, 32, 0.85);
-    border-radius: 28px;
-    overflow: hidden;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--tactile-shadow);
-    transition: transform 0.5s var(--ease-organic), border-color 0.5s var(--ease-organic), box-shadow 0.5s var(--ease-organic);
-}
-
-.remoteVideoContainer:hover {
-    border-color: var(--glass-border-hover);
-    box-shadow: var(--tactile-shadow), var(--tactile-glow-coral);
-    transform: translateY(-4px) scale3d(1.01, 1.01, 1);
-}
-
-.remoteVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 28px;
-}
-
-/* =========================================
-   4. OVERLAYS (USER INFO, MIC & SEAMLESS PLACEHOLDER)
-   ========================================= */
-.userInfoOverlay {
-    position: absolute;
-    top: 18px;
-    left: 18px;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    padding: 7px 16px;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 5;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 4px 18px rgba(0,0,0,0.5);
-}
-
-.usernameText {
-    font-family: var(--font-heading);
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: #ffffff;
-    text-transform: capitalize;
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.micStatusOverlay {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    padding: 9px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 5;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 4px 18px rgba(0,0,0,0.5);
-}
-
-/* SEAMLESS VIDEO OFF PLACEHOLDER */
-.videoOffPlaceholder {
-    width: 100%;
-    height: 100%;
+.lobbyCameraOffPlaceholder {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 50% 50%, rgba(24, 32, 46, 0.95) 0%, rgba(10, 14, 20, 0.98) 100%);
-    color: var(--text-secondary);
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    border-radius: 28px;
+    gap: 12px;
+    color: #94A3B8;
 }
 
-.videoOffIcon {
-    font-size: 4.5rem !important;
-    margin-bottom: 12px;
-    color: var(--text-muted);
-    opacity: 0.7;
-    filter: drop-shadow(0 0 15px rgba(255, 69, 58, 0.2));
-}
-
-.videoOffText {
-    font-family: var(--font-heading);
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-}
-
-/* =========================================
-   5. LOCAL VIDEO (PIP FLOATING POD)
-   ========================================= */
-.localVideoContainer {
-    position: absolute;
-    bottom: 120px;
-    right: 28px;
-    width: 290px;
-    height: auto;
-    aspect-ratio: 16/9;
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--tactile-shadow), 0 20px 45px rgba(0,0,0,0.8);
-    z-index: 60;
-    overflow: hidden;
-    background: rgba(16, 22, 32, 0.92);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    transition: transform 0.4s var(--ease-fluid-bounce), border-color 0.4s var(--ease-organic);
-}
-
-.localVideoContainer:hover {
-    transform: scale3d(1.04, 1.04, 1) translateY(-4px);
-    border-color: var(--accent-biolum-coral);
-    box-shadow: var(--tactile-shadow), var(--tactile-glow-coral);
-}
-
-.localVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
-}
-
-/* =========================================
-   6. TOP LEFT ACTIONS & MEETING INFO
-   ========================================= */
-.topLeftActions {
-    position: absolute;
-    top: 22px;
-    left: 22px;
-    z-index: 100;
-}
-
-.meetingInfoCard {
-    position: absolute;
-    top: 75px;
-    left: 22px;
-    width: 330px;
-    background: var(--glass-bg-elevated);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: 28px;
-    padding: 22px;
-    z-index: 99;
-    box-shadow: var(--tactile-shadow), 0 20px 50px rgba(0,0,0,0.8);
-    color: white;
-    animation: slideInLeft 0.4s var(--ease-organic);
-}
-
-.meetingInfoHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 10px;
-}
-
-.meetingInfoHeader h3 { margin: 0; font-family: var(--font-heading); font-size: 1.05rem; font-weight: 700; }
-.infoLabel { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px; display: block; }
-
-.linkBox {
-    background: rgba(0, 0, 0, 0.45);
-    padding: 10px 14px;
-    border-radius: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    border: 1px solid var(--glass-border);
-}
-
-.linkText {
-    font-size: 0.82rem;
-    color: var(--accent-biolum-coral);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-family: var(--font-mono);
-}
-
-.copySuccess {
-    font-size: 0.72rem;
-    color: var(--accent-biolum-emerald);
-    margin-top: 6px;
-    text-align: right;
-    height: 15px;
-}
-
-.meetingInfoContainer {
-    position: absolute;
-    bottom: 28px;
-    left: 28px;
-    background: rgba(16, 22, 32, 0.75);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    padding: 10px 22px;
-    border-radius: var(--radius-organic-pill);
-    border: 1px solid var(--glass-border);
-    color: white;
-    z-index: 100;
+.avatarCircleLobby {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF453A 0%, #7C3AED 100%);
+    color: #FFFFFF;
+    font-family: var(--font-heading, sans-serif);
+    font-size: 2rem;
+    font-weight: 800;
     display: flex;
     align-items: center;
-    gap: 16px;
-    font-family: var(--font-body);
-    box-shadow: var(--tactile-shadow);
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(255, 69, 58, 0.35);
 }
 
-.timeText { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 600; }
-.meetingCodeText { font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-secondary); border-left: 1px solid var(--glass-border); padding-left: 16px; text-transform: uppercase; letter-spacing: 1px; }
+.camOffLabel {
+    font-size: 0.85rem;
+    color: #64748B;
+    font-weight: 600;
+    margin: 0;
+}
 
-/* =========================================
-   7. FLOATING BIOMORPHIC CONTROL POD
-   ========================================= */
-.buttonContainers {
+.lobbyFloatingControls {
     position: absolute;
-    bottom: 28px;
+    bottom: 14px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     align-items: center;
+    gap: 10px;
+    z-index: 10;
+}
+
+.lobbyMediaBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.lobbyMediaBtn.btnOn {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0F172A;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.lobbyMediaBtn.btnOn:hover {
+    background: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.lobbyMediaBtn.btnOff {
+    background: #FF453A;
+    color: #FFFFFF;
+    box-shadow: 0 6px 18px rgba(255, 69, 58, 0.45);
+}
+
+.lobbyMediaBtn.btnOff:hover {
+    background: #E0382E;
+    transform: translateY(-2px);
+}
+
+/* Right Setup Side */
+.lobbySetupSide {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 32px;
+    padding: clamp(20px, 3vw, 32px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
+}
+
+.lobbyBrandPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 69, 58, 0.08);
+    border: 1px solid rgba(255, 69, 58, 0.2);
+    padding: 6px 14px;
+    border-radius: 50px;
+    width: fit-content;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #FF453A;
+}
+
+.lobbyRoomDetails {
+    margin: 1.2rem 0;
+}
+
+.lobbyHeading {
+    font-family: var(--font-heading, sans-serif);
+    font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.02em;
+}
+
+.lobbySub {
+    font-size: 0.9rem;
+    color: #64748B;
+    margin: 0;
+}
+
+.roomCodeBadge {
+    font-family: var(--font-mono, monospace);
+    color: #0284C7;
+    font-weight: 800;
+    background: rgba(2, 132, 199, 0.08);
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.lobbyFormBox {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.inputWrapperLobby {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lobbyInputLabel {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0F172A;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* 1. SOLID BLACK BORDER AND BLACK TEXT FOR DISPLAY NAME INPUT */
+.lobbyNameInput .MuiOutlinedInput-root {
+    color: #000000 !important;
+    background: #FFFFFF !important;
+    border-radius: 16px !important;
+    border: 2px solid #000000 !important;
+    transition: all 0.25s ease !important;
+    font-size: 0.95rem !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+}
+
+.lobbyNameInput .MuiOutlinedInput-input {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+.lobbyNameInput .MuiOutlinedInput-input::placeholder {
+    color: #64748B !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+}
+
+.lobbyNameInput .MuiOutlinedInput-root:hover {
+    border-color: #000000 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12) !important;
+}
+
+.lobbyNameInput .MuiOutlinedInput-root.Mui-focused {
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.15) !important;
+}
+
+.lobbyNameInput .MuiOutlinedInput-notchedOutline {
+    border: none !important;
+}
+
+.lobbyJoinBtn {
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%) !important;
+    color: #FFFFFF !important;
+    font-family: var(--font-heading, sans-serif) !important;
+    font-weight: 800 !important;
+    font-size: 1rem !important;
+    text-transform: none !important;
+    padding: 14px 0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 25px rgba(255, 69, 58, 0.35) !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.lobbyJoinBtn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 30px rgba(255, 69, 58, 0.5) !important;
+}
+
+.lobbyJoinBtn:disabled {
+    background: #E2E8F0 !important;
+    color: #94A3B8 !important;
+    box-shadow: none !important;
+}
+
+.lobbySecurityFooter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.74rem;
+    color: #64748B;
+    margin-top: 1.2rem;
     justify-content: center;
-    gap: 1.1rem;
-    padding: 12px 32px;
-    background: rgba(16, 22, 32, 0.8);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-organic-pill);
-    z-index: 100;
-    box-shadow: var(--tactile-shadow), 0 25px 60px rgba(0,0,0,0.8);
-    white-space: nowrap;
-}
-
-.iconBlock {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #ffffff !important;
-    padding: 13px !important;
-    border-radius: 50% !important;
-    transition: transform 0.4s var(--ease-fluid-bounce), background-color 0.4s var(--ease-organic), box-shadow 0.4s var(--ease-organic) !important;
-}
-
-.iconBlock:hover {
-    background-color: rgba(255, 255, 255, 0.18) !important;
-    transform: translateY(-4px) scale3d(1.08, 1.08, 1) !important;
-}
-
-/* ACTIVE STATE WITH BIOLUMINESCENT GLOW */
-.iconBlockActive {
-    background: linear-gradient(135deg, var(--accent-biolum-coral) 0%, #d6281c 100%) !important;
-    color: #ffffff !important;
-    padding: 13px !important;
-    border-radius: 50% !important;
-    box-shadow: var(--tactile-glow-coral), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-    transition: transform 0.4s var(--ease-fluid-bounce), box-shadow 0.4s var(--ease-organic) !important;
-}
-
-.iconBlockActive:hover {
-    transform: translateY(-4px) scale3d(1.12, 1.12, 1) !important;
-    box-shadow: 0 10px 30px rgba(255, 69, 58, 0.7) !important;
-}
-
-.iconBlockEnd {
-    background: linear-gradient(135deg, #EB5545 0%, #b82518 100%) !important;
-    color: white !important;
-    padding: 13px 26px !important;
-    width: 72px;
-    border-radius: var(--radius-organic-pill) !important;
-    box-shadow: 0 8px 25px rgba(235, 85, 69, 0.5) !important;
-    transition: transform 0.4s var(--ease-fluid-bounce), box-shadow 0.4s var(--ease-organic) !important;
-}
-
-.iconBlockEnd:hover {
-    transform: scale3d(1.08, 1.08, 1) translateY(-3px) !important;
-    box-shadow: 0 14px 35px rgba(235, 85, 69, 0.7) !important;
 }
 
 /* =========================================
-   8. SIDEBARS (CHAT & PARTICIPANTS)
+   2. IN-MEETING MAIN STAGE (LIGHT THEME)
    ========================================= */
-.sideBar {
-    height: 100%;
-    width: 100%;
-    background: transparent;
+.meetVideoContainer {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background-color: #F1F5F9;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    position: relative;
     overflow: hidden;
 }
 
-.sideBarHeader {
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--glass-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: var(--font-heading);
-}
-
-.sideBarHeader h1, .sideBarHeader h3 { font-size: 1.15rem; margin: 0; font-weight: 800; }
-
-.chattingDisplay { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
-
-/* CHAT BUBBLES */
-.chatBubble { 
-    padding: 14px 18px; 
-    border-radius: 20px; 
-    max-width: 85%; 
-    font-size: 0.94rem; 
-    line-height: 1.48; 
-    word-wrap: break-word; 
-    font-family: var(--font-body); 
-    box-shadow: 0 5px 18px rgba(0,0,0,0.35); 
-}
-
-.msgRemote { 
-    background: rgba(255, 255, 255, 0.08); 
-    backdrop-filter: blur(12px); 
-    border: 1px solid var(--glass-border); 
-    color: var(--text-primary); 
-    align-self: flex-start; 
-    border-bottom-left-radius: 4px; 
-}
-
-.msgLocal { 
-    background: linear-gradient(135deg, var(--accent-biolum-coral) 0%, #d6281c 100%); 
-    color: #ffffff; 
-    align-self: flex-end; 
-    border-bottom-right-radius: 4px; 
-    box-shadow: var(--tactile-glow-coral); 
-}
-
-.senderName { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; opacity: 0.85; margin-bottom: 4px; display: block; }
-.chattingArea { padding: 18px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.35); display: flex; gap: 12px; }
-
-.participantItem { display: flex; justify-content: space-between; align-items: center; padding: 15px 22px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-family: var(--font-body); }
-.participantInfo { display: flex; align-items: center; gap: 14px; }
-.participantAvatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-biolum-coral) 0%, #d6281c 100%); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.9rem; font-weight: 800; box-shadow: 0 0 15px var(--biolum-coral-glow); }
-
-/* MUI Override */
-.textFieldOverride { width: 100%; }
-.textFieldOverride div { color: white !important; border-radius: 14px !important; background-color: rgba(255, 255, 255, 0.05) !important; }
-.textFieldOverride label { color: var(--text-secondary) !important; }
-.textFieldOverride fieldset { border-color: var(--glass-border) !important; }
-
-/* Animations */
-@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* =========================================
-   9. FLEX SPLIT-STAGE & RESIZER STYLING
-   ========================================= */
 .mainStage {
     flex: 1;
     min-height: 0;
@@ -496,130 +411,1109 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background: radial-gradient(circle at 10% 10%, rgba(255, 69, 58, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(2, 132, 199, 0.04) 0%, transparent 40%),
+                #F8FAFC;
+}
+
+/* Top Studio Navigation Bar */
+.studioTopBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px clamp(12px, 2.5vw, 24px);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    flex-shrink: 0;
+    z-index: 50;
+    box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.05);
+}
+
+.topBarLeft {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 1.5vw, 16px);
+}
+
+.topBrandLogo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brandIconMini {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #FF453A, #FF2D55);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brandTitleMini {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.meetingCodeChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(241, 245, 249, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 5px 12px;
+    border-radius: 12px;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.meetingCodeChip:hover {
+    background: #FFFFFF;
+    color: #0F172A;
+    border-color: #CBD5E1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.infoSvg {
+    color: #0284C7;
+    font-size: 1rem !important;
+}
+
+.codeText {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.topBarCenter {
+    display: flex;
+    align-items: center;
+}
+
+.telemetryBadge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(241, 245, 249, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.livePulseDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #10B981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.topBarRight {
+    display: flex;
+    align-items: center;
+}
+
+.sessionClock {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0F172A;
+    background: rgba(241, 245, 249, 0.9);
+    padding: 5px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+/* Media Stage Area */
+.mediaStageArea {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+}
+
+/* Conference Video Grid */
+.conferenceGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: clamp(12px, 2vw, 20px);
+    padding: clamp(12px, 2vw, 24px);
+    padding-bottom: 95px;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+    align-content: center;
+    justify-items: center;
+}
+
+.singleParticipantStage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 70px;
+    box-sizing: border-box;
+}
+
+.soloStageCard {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(28px);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 32px;
+    padding: clamp(2rem, 4vw, 3rem);
+    text-align: center;
+    max-width: 480px;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
+    margin: 1rem;
+}
+
+.soloSvgWrapper {
+    width: 68px;
+    height: 68px;
+    border-radius: 22px;
+    background: rgba(2, 132, 199, 0.08);
+    border: 1px solid rgba(2, 132, 199, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.2rem auto;
+}
+
+.soloStageCard h2 {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 8px 0;
+}
+
+.soloStageCard p {
+    font-size: 0.9rem;
+    color: #64748B;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+}
+
+.copyInviteBtn {
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%) !important;
+    color: #FFFFFF !important;
+    font-family: var(--font-heading, sans-serif) !important;
+    font-weight: 800 !important;
+    padding: 10px 24px !important;
+    border-radius: 14px !important;
+    text-transform: none !important;
+    box-shadow: 0 6px 20px rgba(255, 69, 58, 0.35) !important;
+    transition: all 0.25s ease !important;
+}
+
+.copyInviteBtn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 25px rgba(255, 69, 58, 0.5) !important;
+}
+
+/* Remote Video Container Tile */
+.remoteVideoContainer {
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    aspect-ratio: 16/9;
+    background: #0B0F19;
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.12);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.remoteVideoContainer:hover {
+    border-color: #0284C7;
+    box-shadow: 0 20px 45px -10px rgba(2, 132, 199, 0.25);
+}
+
+.remoteVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 22px;
+}
+
+.userInfoOverlay {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 5px 12px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 5;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.participantDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #10B981;
+}
+
+.usernameText {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-transform: capitalize;
+}
+
+.micStatusOverlay {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.videoOffPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0B0F19;
+    color: #94A3B8;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    border-radius: 22px;
+}
+
+.avatarCircleRemote {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0284C7 0%, #00F2FE 100%);
+    color: #050608;
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1.7rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
+    margin-bottom: 8px;
+}
+
+.videoOffText {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #CBD5E1;
+    margin: 0;
+}
+
+/* Local Floating PiP Card */
+.localPipCard {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    width: clamp(130px, 18vw, 220px);
+    aspect-ratio: 16/9;
+    border-radius: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 15px 40px -10px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8);
+    z-index: 60;
+    overflow: hidden;
+    background: #0B0F19;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.localPipCard:hover {
+    transform: translateY(-3px) scale(1.03);
+    border-color: #0284C7;
+    box-shadow: 0 20px 45px -10px rgba(2, 132, 199, 0.35);
+}
+
+.pipOverlayTop {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.pipUserTag {
+    background: rgba(15, 23, 42, 0.75);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.pipMicIcon {
+    background: rgba(15, 23, 42, 0.75);
+    padding: 3px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.localVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+.avatarPip {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF453A 0%, #7C3AED 100%);
+    color: #FFFFFF;
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1.3rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================================
+   3. FLOATING APPLE-STYLE CONTROL DOCK (LIGHT)
+   ========================================= */
+.floatingControlDock {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 50px;
+    z-index: 80;
+    box-shadow: 0 16px 40px -10px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.9);
+    width: auto;
+    min-width: fit-content;
+    max-width: calc(100vw - 24px);
+}
+
+.dockActionBtn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    color: #475569;
+    flex-shrink: 0;
+}
+
+.dockActionBtn svg {
+    font-size: 1.25rem;
+}
+
+.dockNormal {
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+}
+
+.dockNormal:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+    transform: translateY(-2px) scale(1.06);
+}
+
+.dockActive {
+    background: #0F172A;
+    color: #FFFFFF;
+}
+
+.dockActive:hover {
+    background: #1E293B;
+    transform: translateY(-2px);
+}
+
+.dockMuted {
+    background: #FF453A;
+    color: #FFFFFF;
+    box-shadow: 0 4px 14px rgba(255, 69, 58, 0.35);
+}
+
+.dockMuted:hover {
+    background: #E0382E;
+    transform: translateY(-2px);
+}
+
+.dockHighlightCyan {
+    background: linear-gradient(135deg, #0284C7 0%, #00F2FE 100%);
+    color: #050608;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+.dockHighlightCyan:hover {
+    transform: translateY(-2px) scale(1.06);
+}
+
+.dockHighlightCoral {
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%);
+    color: #FFFFFF;
+    box-shadow: 0 4px 14px rgba(255, 69, 58, 0.35);
+}
+
+.dockHighlightCoral:hover {
+    transform: translateY(-2px) scale(1.06);
+}
+
+.dockHighlightViolet {
+    background: linear-gradient(135deg, #7C3AED 0%, #9D4EDD 100%);
+    color: #FFFFFF;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+
+.dockHighlightViolet:hover {
+    transform: translateY(-2px) scale(1.06);
+}
+
+.dockEndCallBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #FF453A 0%, #E0382E 100%);
+    color: #FFFFFF;
+    border: none;
+    padding: 0 18px;
+    height: 44px;
+    border-radius: 50px;
+    font-family: var(--font-heading, sans-serif);
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(255, 69, 58, 0.45);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.dockEndCallBtn:hover {
+    transform: scale(1.04) translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 69, 58, 0.6);
+}
+
+/* =========================================
+   4. SIDEBARS (CHAT, PARTICIPANTS, TRANSCRIPT)
+   ========================================= */
+.sideBarContainer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border-left: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: -15px 0 45px -10px rgba(15, 23, 42, 0.08);
+    z-index: 70;
+    overflow: hidden;
 }
 
 .resizer {
     width: 6px;
     height: 100%;
     cursor: col-resize;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-left: 1px solid var(--glass-border);
-    border-right: 1px solid var(--glass-border);
+    background-color: transparent;
+    border-left: 1px solid rgba(226, 232, 240, 0.8);
     transition: background-color 0.2s ease;
     z-index: 100;
 }
+
 .resizer:hover, .resizer:active {
-    background-color: var(--accent-biolum-coral);
+    background-color: #0284C7;
 }
 
-.sideBarContainer {
+.sidebarTabWrapper {
+    border-bottom: 1px solid #E2E8F0;
+    background: #F8FAFC;
+    padding: 6px 10px;
+}
+
+.sideBar {
     height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    background: var(--glass-bg-elevated);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-left: 1px solid var(--glass-border);
-    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.8);
-    z-index: 50;
     overflow: hidden;
+    background: #FFFFFF;
+}
+
+.sideBarHeader {
+    padding: 14px 18px;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sideBarHeader h3 {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0;
+}
+
+/* Participants List */
+.participantsScrollList {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px 0;
+}
+
+.participantItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.participantInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.participantAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0284C7 0%, #00F2FE 100%);
+    color: #050608;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading, sans-serif);
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.participantDetailsCol {
+    display: flex;
+    flex-direction: column;
+}
+
+.participantNameText {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #0F172A;
+    text-transform: capitalize;
+}
+
+.participantRoleTag {
+    font-size: 0.72rem;
+    color: #64748B;
+}
+
+/* Chat Messages */
+.chattingDisplay {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #F8FAFC;
+}
+
+.emptyChatPlaceholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #94A3B8;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.chatBubble {
+    padding: 10px 14px;
+    border-radius: 16px;
+    max-width: 82%;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    word-wrap: break-word;
+}
+
+.msgRemote {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    color: #0F172A;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.msgLocal {
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%);
+    color: #FFFFFF;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 4px 14px rgba(255, 69, 58, 0.25);
+}
+
+.senderName {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 0.72rem;
+    font-weight: 800;
+    opacity: 0.85;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.msgBodyText {
+    font-size: 0.88rem;
+}
+
+.chattingArea {
+    padding: 12px;
+    border-top: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* 2(ii) SOLID BLACK BORDER AND BLACK TEXT FOR CHAT INPUT FIELD */
+.textFieldOverride .MuiOutlinedInput-root {
+    color: #000000 !important;
+    background: #FFFFFF !important;
+    border-radius: 14px !important;
+    border: 2px solid #000000 !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+}
+
+.textFieldOverride .MuiOutlinedInput-input {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 500 !important;
+}
+
+.textFieldOverride .MuiOutlinedInput-input::placeholder {
+    color: #64748B !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+}
+
+.textFieldOverride .MuiOutlinedInput-root:hover {
+    border-color: #000000 !important;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.1) !important;
+}
+
+.textFieldOverride .MuiOutlinedInput-root.Mui-focused {
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.15) !important;
+}
+
+.textFieldOverride .MuiOutlinedInput-notchedOutline {
+    border: none !important;
+}
+
+.chatSendBtn {
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%) !important;
+    color: #FFFFFF !important;
+    font-family: var(--font-heading, sans-serif) !important;
+    font-weight: 800 !important;
+    border-radius: 14px !important;
+    padding: 0 20px !important;
+    height: 40px !important;
+    text-transform: none !important;
+    box-shadow: 0 4px 14px rgba(255, 69, 58, 0.35) !important;
+}
+
+.chatSendBtn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(255, 69, 58, 0.5) !important;
+}
+
+/* Transcript Panel */
+.transcriptScrollArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #F8FAFC;
+}
+
+.emptyTranscriptNotice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #94A3B8;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 20px;
+}
+
+.transcriptRadarDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #0284C7;
+    box-shadow: 0 0 12px rgba(2, 132, 199, 0.6);
+    margin-bottom: 12px;
+}
+
+.transcriptEntryCard {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-left: 3.5px solid #0284C7;
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.transcriptEntryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.transcriptSpeakerTag {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #0284C7;
+    text-transform: capitalize;
+    font-family: var(--font-heading, sans-serif);
+}
+
+.transcriptTimestamp {
+    font-size: 0.68rem;
+    font-family: var(--font-mono, monospace);
+    color: #94A3B8;
+}
+
+.transcriptTextContent {
+    font-size: 0.85rem;
+    color: #1E293B;
+    line-height: 1.45;
+    margin: 0;
+}
+
+/* Captions Floating Banner - Light Theme */
+.captionsFloatingBanner {
+    position: absolute;
+    bottom: 85px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1.5px solid #000000;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    max-width: 80%;
+    text-align: center;
+    z-index: 60;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    pointer-events: none;
+}
+
+.captionSpeaker {
+    color: #FF453A;
+    font-weight: 800;
+    margin-right: 8px;
+    text-transform: capitalize;
+}
+
+.captionContent {
+    color: #000000;
+    font-weight: 600;
+}
+
+/* Whiteboard Container & Top-Right Close Button */
+.whiteboardContainer {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    padding: 16px;
+    padding-bottom: 85px;
+    box-sizing: border-box;
+}
+
+.whiteboardTopRightCloseBtn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid #0F172A;
+    color: #0F172A;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 150;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.whiteboardTopRightCloseBtn:hover {
+    background: #0F172A;
+    color: #FFFFFF;
+    transform: scale(1.08);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+}
+
+/* Meeting Info Card */
+.meetingInfoCard {
+    position: absolute;
+    top: 14px;
+    left: 20px;
+    width: min(340px, 90vw);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 24px;
+    padding: 18px;
+    z-index: 100;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+
+.meetingInfoHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.meetingInfoHeader h3 {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0;
+}
+
+.infoLabel {
+    font-size: 0.72rem;
+    color: #64748B;
+    margin-bottom: 6px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.linkBox {
+    background: #F8FAFC;
+    padding: 8px 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1.5px solid #0F172A;
+}
+
+.linkText {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.8rem;
+    color: #0284C7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.copySuccess {
+    font-size: 0.72rem;
+    color: #10B981;
+    margin: 6px 0 0 0;
+    text-align: right;
+    font-weight: 700;
 }
 
 /* =========================================
-   10. RESPONSIVE MEDIA QUERIES
+   5. COMPREHENSIVE RESPONSIVENESS (ALL VIEWPORTS)
    ========================================= */
-@media (max-width: 1024px) {
-    .remoteVideoContainer {
-        flex: 1 1 45%;
-    }
-}
-
-@media (max-width: 768px) {
-    .meetVideoContainer {
-        height: 100dvh;
+@media (max-width: 900px) {
+    .lobbyMainHub {
+        flex-direction: column;
+        gap: 1.2rem;
+        max-width: 500px;
     }
 
-    .conferenceView {
-        padding: 12px;
-        padding-bottom: 165px;
-        gap: 12px;
-        align-content: flex-start;
+    .lobbyPreviewSide, .lobbySetupSide {
+        border-radius: 24px;
+        padding: 18px;
     }
 
-    .remoteVideoContainer {
-        flex: 1 1 100%;
-        max-width: 100%;
-        aspect-ratio: 4/3;
-        border-radius: 20px;
+    .floatingControlDock {
+        width: auto;
+        min-width: fit-content;
+        max-width: calc(100vw - 24px);
+        padding: 6px 14px;
+        gap: 10px;
+        justify-content: center;
+        bottom: 14px;
+        border-radius: 50px;
     }
 
-    .localVideoContainer {
-        width: 115px;
-        bottom: 100px;
-        right: 15px;
+    .dockActionBtn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .dockEndCallBtn {
+        padding: 0 14px;
+        height: 40px;
+        font-size: 0.85rem;
+    }
+
+    .localPipCard {
+        width: 105px;
+        bottom: 74px;
+        right: 12px;
         border-radius: 14px;
     }
 
-    .buttonContainers {
-        width: 92%;
-        padding: 10px 14px;
-        gap: 0.4rem;
-        justify-content: space-between;
-        bottom: 18px;
+    .sideBarContainer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw !important;
+        height: 72vh !important;
+        border-left: none;
+        border-top: 1px solid #E2E8F0;
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -20px 50px rgba(15, 23, 42, 0.15);
+        z-index: 120;
     }
 
-    .iconBlock, .iconBlockActive {
-        padding: 10px !important;
-    }
-    
-    .iconBlockEnd {
-        padding: 10px !important;
-        width: 54px;
-    }
-
-    .sideBar {
-        width: 100%;
-        top: 0; right: 0; left: 0; bottom: 0;
-        border-radius: 0;
-        z-index: 200;
-    }
-
-    .sideBarHeader {
-        padding-top: 45px;
-    }
-
-    .meetingInfoContainer {
-        top: 15px;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: auto;
-        padding: 6px 14px;
-        background: rgba(0,0,0,0.75);
-        white-space: nowrap;
-    }
-    
-    .meetingCodeText {
+    .resizer {
         display: none;
     }
 
-    .topLeftActions {
-        top: 15px;
-        left: 10px;
+    .whiteboardContainer {
+        padding: 8px;
+        padding-bottom: 75px;
     }
 
-    .meetingInfoCard {
-        width: 90%;
-        left: 5%;
-        top: 65px;
+    .whiteboardTopRightCloseBtn {
+        top: 14px;
+        right: 14px;
+        width: 36px;
+        height: 36px;
     }
 }
 
-@media (max-width: 380px) {
-    .buttonContainers {
-        padding: 6px 8px;
-        gap: 0.2rem;
+@media (max-width: 600px) {
+    .lobbyStage {
+        padding: 0.8rem;
     }
-    .iconBlock, .iconBlockActive {
-        padding: 8px !important;
+
+    .studioTopBar {
+        padding: 8px 12px;
+    }
+
+    .brandTitleMini {
+        display: none;
+    }
+
+    .telemetryBadge {
+        display: none;
+    }
+
+    .conferenceGrid {
+        padding: 8px;
+        padding-bottom: 80px;
+        gap: 10px;
+    }
+
+    .floatingControlDock {
+        width: auto;
+        min-width: fit-content;
+        max-width: calc(100vw - 20px);
+        padding: 6px 12px;
+        gap: 8px;
+        justify-content: center;
+        bottom: 12px;
+    }
+
+    .dockActionBtn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .dockActionBtn svg {
+        font-size: 1.15rem;
+    }
+
+    .dockEndCallBtn {
+        padding: 0 12px;
+        height: 38px;
+        font-size: 0.82rem;
+    }
+
+    .localPipCard {
+        width: 92px;
+        bottom: 66px;
+        right: 8px;
+    }
+
+    .meetingInfoCard {
+        left: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
     }
 }
