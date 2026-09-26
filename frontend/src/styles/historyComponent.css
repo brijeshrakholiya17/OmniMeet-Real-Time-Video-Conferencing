@@ -1,197 +1,361 @@
 /* ==========================================================================
-   OMNIMEET - MEETING HISTORY STYLES (historyComponent.css - Organic Biomorphic)
+   OMNIMEET - MEETING HISTORY STYLES (historyComponent.css - Luxury Light Theme)
    ========================================================================== */
 
-/* =========================================
-   1. PAGE CONTAINER & VOID FLARING
-   ========================================= */
-.historyContainer {
+.historyContainer.lightTheme {
     min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
-    background-color: var(--bg-void);
+    background-color: #FAFCFF;
     background-image: 
-        radial-gradient(ellipse at 50% 0%, rgba(255, 69, 58, 0.16) 0%, transparent 65%),
-        radial-gradient(circle at 100% 100%, rgba(0, 242, 254, 0.08) 0%, transparent 55%);
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    padding: 2.8rem 4rem;
+        radial-gradient(circle at 15% 15%, rgba(255, 69, 58, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(2, 132, 199, 0.08) 0%, transparent 45%);
+    color: #0f172a;
+    font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif);
+    padding: 2.5rem 3.5rem 4rem 3.5rem;
     box-sizing: border-box;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
-/* =========================================
-   2. HEADER SECTION & BACK BUTTON
-   ========================================= */
+/* Grid Overlay & Glow */
+.historyGridOverlay {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.historyGlow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+}
+
+.glowTop {
+    width: 45vw;
+    height: 45vw;
+    max-width: 500px;
+    max-height: 500px;
+    top: -10%;
+    left: 10%;
+    background: radial-gradient(circle, rgba(255, 69, 58, 0.14) 0%, transparent 70%);
+}
+
+.glowBottom {
+    width: 40vw;
+    height: 40vw;
+    max-width: 450px;
+    max-height: 450px;
+    bottom: -10%;
+    right: 5%;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.14) 0%, transparent 70%);
+}
+
+/* Header Section */
 .historyHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    position: relative;
+    z-index: 2;
+    gap: 1.5rem;
+}
+
+.historyHeaderLeft {
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    margin-bottom: 2.8rem;
-    padding-bottom: 1.6rem;
-    border-bottom: 1px solid var(--glass-border);
+}
+
+.historyBackBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    padding: 8px 16px;
+    border-radius: 14px;
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.historyBackBtn:hover {
+    background: #f8fafc;
+    border-color: #0284C7;
+    color: #0284C7;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 .titleBox h2 {
-    font-family: var(--font-heading);
-    font-size: 2.3rem;
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1.85rem;
     font-weight: 900;
-    margin: 0;
-    background: linear-gradient(135deg, #ffffff 0%, var(--accent-biolum-cyan) 50%, var(--accent-biolum-coral) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
     letter-spacing: -0.03em;
+    color: #0f172a;
+    margin: 0;
 }
 
 .titleBox p {
-    margin: 5px 0 0 0;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+    margin: 4px 0 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
 }
 
-.backBtn {
-    background-color: rgba(255, 255, 255, 0.06) !important;
-    color: white !important;
-    transition: all 0.4s var(--ease-fluid-bounce) !important;
-    border: 1px solid var(--glass-border) !important;
-    border-radius: 50% !important;
+.sessionCountBadge {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0284C7;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
-.backBtn:hover {
-    background-color: var(--accent-biolum-coral) !important;
-    border-color: var(--accent-biolum-coral) !important;
-    transform: translateX(-4px) scale(1.08) !important;
-    box-shadow: var(--tactile-glow-coral) !important;
+/* History Content & Cards */
+.historyContentArea {
+    position: relative;
+    z-index: 2;
 }
 
-/* =========================================
-   3. GRID LAYOUT & BIOMORPHIC GLASS CARDS
-   ========================================= */
 .gridContainer {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-    gap: 26px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+    gap: 24px;
     width: 100%;
 }
 
 .historyCard {
-    background: var(--glass-bg-elevated) !important;
-    backdrop-filter: var(--glass-blur) !important;
-    -webkit-backdrop-filter: var(--glass-blur) !important;
-    border: 1px solid var(--glass-border) !important;
-    border-radius: var(--radius-organic-card) !important;
-    transition: transform 0.5s var(--ease-organic), border-color 0.5s var(--ease-organic), box-shadow 0.5s var(--ease-organic) !important;
-    position: relative;
-    overflow: hidden;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .historyCard:hover {
-    transform: translateY(-6px) scale3d(1.025, 1.025, 1) !important;
-    box-shadow: var(--tactile-shadow), var(--tactile-glow-coral) !important;
-    border-color: var(--glass-border-hover) !important;
+    transform: translateY(-4px) scale(1.01) !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.12) !important;
 }
 
 .cardContent {
-    padding: 1.8rem !important;
+    padding: 1.5rem !important;
     display: flex;
     flex-direction: column;
-    gap: 1.3rem;
+    gap: 1.2rem;
     height: 100%;
+    box-sizing: border-box;
 }
 
-/* --- MONO DETAIL TYPOGRAPHY (Meeting Code & Dates) --- */
-.meetingCode {
-    font-family: var(--font-mono) !important;
-    font-size: 1.15rem !important;
-    font-weight: 600 !important;
-    color: #ffffff !important;
-    margin: 0 !important;
+.cardHeaderRow {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    letter-spacing: 0.5px;
 }
 
-.cardDetails {
-    margin-top: auto;
-    padding-top: 16px;
-    border-top: 1px solid var(--glass-border);
+.codeChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.codeSvg {
+    font-size: 1.1rem !important;
+    color: #FF453A;
+}
+
+.codeText {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.deleteBtn {
+    color: #94a3b8 !important;
+    transition: color 0.2s !important;
+}
+
+.deleteBtn:hover {
+    color: #e11d48 !important;
+    background: #fff1f2 !important;
+}
+
+.cardDetailsBox {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
 }
 
-.dateText {
-    font-family: var(--font-mono) !important;
-    font-size: 0.88rem !important;
-    color: var(--text-secondary) !important;
-    font-weight: 500 !important;
-    display: flex !important;
+.metaRow {
+    display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    font-size: 0.82rem;
+    font-family: var(--font-mono, monospace);
+    color: #475569;
+    font-weight: 600;
 }
 
-/* =========================================
-   4. EMPTY STATE & DIALOG OVERRIDES
-   ========================================= */
+.metaIcon {
+    font-size: 1rem !important;
+    color: #64748b;
+}
+
+.cardActionsWrapper {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.viewAiBtn {
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%) !important;
+    color: #ffffff !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    font-size: 0.88rem !important;
+    text-transform: none !important;
+    border-radius: 14px !important;
+    padding: 8px 16px !important;
+    box-shadow: 0 4px 14px rgba(255, 69, 58, 0.3) !important;
+}
+
+.generateAiBtn {
+    color: #0284C7 !important;
+    border-color: #cbd5e1 !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    text-transform: none !important;
+    border-radius: 14px !important;
+    padding: 7px 16px !important;
+}
+
+.generateAiBtn:hover {
+    background: #f0f9ff !important;
+    border-color: #0284C7 !important;
+}
+
+.copyDetailsBtn {
+    color: #64748b !important;
+    font-family: var(--font-body) !important;
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+    text-transform: none !important;
+    border-radius: 12px !important;
+}
+
+.copyDetailsBtn:hover {
+    color: #0f172a !important;
+    background: #f1f5f9 !important;
+}
+
+/* Empty State */
 .emptyState {
-    grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 50vh;
-    color: var(--text-muted);
+    min-height: 45vh;
     text-align: center;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 32px;
+    padding: 3rem 2rem;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+}
+
+.emptyIconWrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: #64748b;
+}
+
+.emptySvg {
+    font-size: 2.2rem !important;
 }
 
 .emptyState h3 {
-    font-family: var(--font-heading);
-    font-size: 1.7rem;
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1.35rem;
     font-weight: 800;
-    margin-bottom: 10px;
+    color: #0f172a;
+    margin: 0 0 6px 0;
 }
 
-/* --- AI Insights Dialog Refinement --- */
-.MuiDialog-paper {
-    background: var(--glass-bg-elevated) !important;
-    backdrop-filter: var(--glass-blur) !important;
-    -webkit-backdrop-filter: var(--glass-blur) !important;
-    border: 1px solid var(--glass-border) !important;
-    border-radius: 36px !important;
-    box-shadow: var(--tactile-shadow), 0 35px 70px rgba(0, 0, 0, 0.95) !important;
-    color: var(--text-primary) !important;
+.emptyState p {
+    font-size: 0.9rem;
+    color: #64748b;
+    max-width: 440px;
+    margin: 0 0 1.5rem 0;
 }
 
-/* =========================================
-   5. RESPONSIVE ADJUSTMENTS
-   ========================================= */
+.emptyLaunchBtn {
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%) !important;
+    color: #ffffff !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    padding: 10px 24px !important;
+    border-radius: 16px !important;
+    text-transform: none !important;
+    box-shadow: 0 6px 20px rgba(255, 69, 58, 0.35) !important;
+}
+
+/* Responsiveness */
 @media (max-width: 768px) {
-    .historyContainer {
-        padding: 1.5rem;
+    .historyContainer.lightTheme {
+        padding: 1.5rem 1rem 3rem 1rem;
     }
-    
     .historyHeader {
-        flex-direction: row;
+        flex-direction: column;
+        align-items: flex-start;
         gap: 1rem;
-        margin-bottom: 2rem;
     }
-
+    .historyHeaderLeft {
+        gap: 1rem;
+    }
     .titleBox h2 {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
     }
-
-    .titleBox p {
-        font-size: 0.85rem;
-    }
-    
     .gridContainer {
         grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .historyCard {
-        width: 100%; 
     }
 }

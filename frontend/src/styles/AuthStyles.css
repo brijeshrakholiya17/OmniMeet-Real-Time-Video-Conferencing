@@ -1,194 +1,325 @@
 /* ==========================================================================
-   OMNIMEET - AUTHENTICATION STYLES (AuthStyles.css - Organic Biomorphic Theme)
+   OMNIMEET - AUTHENTICATION STYLES (AuthStyles.css - Luxury Light Awwwards Theme)
    ========================================================================== */
 
-/* 1. MAIN CONTAINER (ORGANIC BIOLUMINESCENT VOID) */
-.auth-container {
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    background: 
-        radial-gradient(ellipse at 50% 30%, rgba(255, 69, 58, 0.2) 0%, transparent 55%),
-        radial-gradient(circle at 15% 85%, rgba(0, 242, 254, 0.14) 0%, transparent 48%),
-        radial-gradient(circle at 85% 15%, rgba(123, 44, 191, 0.12) 0%, transparent 48%),
-        var(--bg-void-deep);
+.authContainer.lightTheme {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: #FAFCFF;
+    background-image: 
+        radial-gradient(circle at 15% 20%, rgba(255, 69, 58, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(2, 132, 199, 0.08) 0%, transparent 45%);
+    color: #0f172a;
+    font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Micro Dot Pattern Grid */
+.authGridOverlay {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Ambient Glows */
+.authGlow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+}
+
+.glowLeft {
+    width: 40vw;
+    height: 40vw;
+    max-width: 450px;
+    max-height: 450px;
+    top: 10%;
+    left: -10%;
+    background: radial-gradient(circle, rgba(255, 69, 58, 0.14) 0%, transparent 70%);
+}
+
+.glowRight {
+    width: 40vw;
+    height: 40vw;
+    max-width: 450px;
+    max-height: 450px;
+    bottom: 10%;
+    right: -10%;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.14) 0%, transparent 70%);
+}
+
+/* Top Back Button */
+.authBackWrapper {
+    position: absolute;
+    top: 24px;
+    left: 28px;
+    z-index: 10;
+}
+
+.authBackBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    padding: 8px 16px;
+    border-radius: 14px;
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.authBackBtn:hover {
+    background: #f8fafc;
+    border-color: #0284C7;
+    color: #0284C7;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+/* Center Card Container */
+.authCardWrapper {
+    width: 100%;
+    max-width: 460px;
+    z-index: 2;
+    margin: auto;
+}
+
+.authCard {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 32px;
+    padding: 2.5rem 2.2rem;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-sizing: border-box;
+}
+
+/* Header & Brand */
+.authBrandHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.authBrandIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%);
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-body);
-    color: var(--text-primary);
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(255, 69, 58, 0.35);
 }
 
-/* Dynamic Ambient Glow Flare */
-.auth-container::after {
-    content: "";
-    position: absolute;
-    width: 45vw; height: 45vh;
-    background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, transparent 70%);
-    filter: blur(90px);
-    pointer-events: none;
-    animation: liquidPulse 9s ease-in-out infinite alternate;
+.authBrandSvg {
+    font-size: 1.5rem !important;
 }
 
-/* 2. ORGANIC TACTILE GLASS POD */
-.auth-card {
-    background: var(--glass-bg-elevated);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: 36px;
-    padding: 3.2rem 3rem;
-    width: 90%;
-    max-width: 490px;
-    box-shadow: var(--tactile-shadow), 0 35px 70px rgba(0, 0, 0, 0.9);
-    position: relative;
-    z-index: 5;
-    transition: transform 0.5s var(--ease-organic), border-color 0.5s var(--ease-organic), box-shadow 0.5s var(--ease-organic);
-}
-
-.auth-card:hover {
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: var(--tactile-shadow), 0 40px 80px rgba(0, 0, 0, 0.95), var(--tactile-glow-coral);
-    transform: translateY(-4px) scale3d(1.01, 1.01, 1);
-}
-
-/* 3. HEADINGS & TYPOGRAPHY */
-.auth-header h2 {
-    font-family: var(--font-heading);
-    font-weight: 800;
-    font-size: 2.2rem;
+.authBrandTitle {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1.5rem;
+    font-weight: 900;
     letter-spacing: -0.03em;
-    color: var(--text-primary);
-    margin-bottom: 0.4rem;
+    color: #0f172a;
+    margin: 0;
 }
 
-.auth-header p {
-    font-family: var(--font-body);
-    font-weight: 400;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+.authBrandSub {
+    font-size: 0.72rem;
+    font-family: var(--font-mono, monospace);
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
-/* 4. BIOMORPHIC TOGGLE BUTTON GROUP */
-.btn-toggle-group {
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-organic-pill);
-    padding: 6px;
+.authTitleSection {
+    text-align: center;
+}
+
+.authMainHeading {
+    font-family: var(--font-heading, sans-serif);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+.authSubHeading {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Toggle Pill */
+.authToggleGroup {
     display: flex;
-    margin-bottom: 2.2rem;
-    margin-top: 1.6rem;
-    box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.7);
+    background: #f1f5f9;
+    padding: 5px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    gap: 4px;
 }
 
-.btn-toggle {
+.authToggleBtn {
+    flex: 1;
+    padding: 9px 0;
+    border-radius: 12px;
     border: none;
     background: transparent;
-    flex: 1;
-    padding: 0.7rem 1.2rem;
-    border-radius: 40px;
-    font-family: var(--font-heading);
+    font-family: var(--font-body, sans-serif);
+    font-size: 0.9rem;
     font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    transition: transform 0.4s var(--ease-fluid-bounce), background 0.4s var(--ease-organic), color 0.4s var(--ease-organic), box-shadow 0.4s var(--ease-organic);
+    color: #64748b;
     cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.btn-toggle.active {
-    background: linear-gradient(135deg, var(--accent-biolum-coral) 0%, #d6281c 100%);
-    color: #ffffff;
-    box-shadow: var(--tactile-glow-coral), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    transform: scale3d(1.03, 1.03, 1);
+.authToggleBtn.active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
 }
 
-.btn-toggle:not(.active):hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.08);
+/* Form Styling */
+.authForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
 }
 
-/* 5. INPUT FOCUS STATES & DYNAMIC BORDER MORPHING */
-.MuiOutlinedInput-root {
-    transition: transform 0.4s var(--ease-organic), border-color 0.4s var(--ease-organic), box-shadow 0.4s var(--ease-organic), background-color 0.4s var(--ease-organic) !important;
+.formInputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.MuiOutlinedInput-root.Mui-focused {
-    transform: scale3d(1.025, 1.025, 1) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: var(--tactile-glow-coral) !important;
+.inputLabel {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #334155;
+    letter-spacing: 0.02em;
 }
 
-.form-floating > .form-control {
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--glass-border);
-    color: var(--text-primary);
-    border-radius: 18px;
-    transition: transform 0.4s var(--ease-organic), border-color 0.4s var(--ease-organic), box-shadow 0.4s var(--ease-organic);
+.inputWithIcon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 2px solid #0F172A;
+    border-radius: 16px;
+    padding: 8px 14px;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
 }
 
-.form-floating > .form-control:focus {
-    transform: scale3d(1.025, 1.025, 1);
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: var(--accent-biolum-coral);
-    box-shadow: var(--tactile-glow-coral);
-    color: var(--text-primary);
+.inputWithIcon:focus-within {
+    background: #ffffff;
+    border-color: #0F172A;
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.12);
 }
 
-.form-floating > label {
-    color: var(--text-secondary);
+.fieldIcon {
+    color: #0F172A;
+    font-size: 1.15rem !important;
 }
 
-.form-floating > .form-control:focus ~ label,
-.form-floating > .form-control:not(:placeholder-shown) ~ label {
-    color: var(--text-primary);
-}
-
-/* 6. PRIMARY BIOLUMINESCENT SUBMIT BUTTON */
-.btn-primary-custom {
-    background: linear-gradient(135deg, var(--accent-biolum-coral) 0%, #d6281c 100%);
-    border: none;
-    padding: 0.95rem;
-    font-family: var(--font-heading);
-    font-weight: 800;
-    font-size: 1.15rem;
-    border-radius: var(--radius-organic-pill);
-    transition: transform 0.4s var(--ease-fluid-bounce), box-shadow 0.4s var(--ease-organic), filter 0.4s var(--ease-organic);
-    margin-top: 1.2rem;
+.authTextField {
     width: 100%;
-    color: #ffffff;
-    box-shadow: var(--tactile-glow-coral), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    cursor: pointer;
 }
 
-.btn-primary-custom:hover {
-    transform: scale3d(1.04, 1.04, 1) translateY(-3px);
-    box-shadow: 0 20px 45px rgba(255, 69, 58, 0.6), 0 0 35px var(--biolum-coral-glow);
-    filter: brightness(1.08);
-    color: #ffffff;
+.authTextField input {
+    color: #0f172a !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 4px 0 !important;
+    font-family: var(--font-body, sans-serif) !important;
 }
 
-/* 7. TOAST NOTIFICATION */
-.custom-toast {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    z-index: 1050;
-    background: var(--glass-bg-elevated);
-    backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    color: var(--text-primary);
-    border-radius: 20px;
-    box-shadow: var(--tactile-shadow), 0 15px 40px rgba(0, 0, 0, 0.7);
+.authTextField input::placeholder {
+    color: #64748b !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
 }
 
-/* 8. BROWSER AUTOFILL OVERRIDES */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active {
-    transition: background-color 5000s ease-in-out 0s;
-    -webkit-text-fill-color: var(--text-primary) !important;
-    caret-color: var(--text-primary);
+/* Error Banner */
+.authErrorBanner {
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    color: #e11d48;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Submit Button */
+.authSubmitBtn {
+    background: linear-gradient(135deg, #FF453A 0%, #FF2D55 100%) !important;
+    color: #ffffff !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    font-size: 1rem !important;
+    text-transform: none !important;
+    padding: 13px 0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 24px rgba(255, 69, 58, 0.35) !important;
+    margin-top: 6px !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.authSubmitBtn:hover {
+    transform: scale(1.02) translateY(-1px) !important;
+    box-shadow: 0 12px 30px rgba(255, 69, 58, 0.5) !important;
+}
+
+.authFooterNote {
+    text-align: center;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* Responsiveness */
+@media (max-width: 480px) {
+    .authBackWrapper {
+        top: 16px;
+        left: 16px;
+    }
+    .authBackBtn span {
+        display: none;
+    }
+    .authCard {
+        padding: 2rem 1.4rem;
+        border-radius: 24px;
+    }
 }

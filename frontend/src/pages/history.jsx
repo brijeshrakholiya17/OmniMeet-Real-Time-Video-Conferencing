@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { AuthContext } from '../contexts/AuthContext'
+import React, { useContext, useEffect, useState } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -8,21 +8,39 @@ import HomeIcon from '@mui/icons-material/Home';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime'; 
 import CodeIcon from '@mui/icons-material/Code';
-import { IconButton, Snackbar, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, List, ListItem, ListItemIcon, ListItemText, Divider, Box } from '@mui/material';
+import { 
+    IconButton, 
+    Snackbar, 
+    Alert, 
+    Button, 
+    Dialog, 
+    DialogTitle, 
+    DialogContent, 
+    DialogActions, 
+    CircularProgress, 
+    List, 
+    ListItem, 
+    ListItemText, 
+    Divider, 
+    Box,
+    Tooltip
+} from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import GavelIcon from '@mui/icons-material/Gavel';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
 import axios from 'axios';
 import server from '../environment';
 import "../styles/historyComponent.css"; 
 
 export default function History() {
     const { getMeetingSessions } = useContext(AuthContext);
-    const [meetings, setMeetings] = useState([])
+    const [meetings, setMeetings] = useState([]);
     const [error, setError] = useState("");
     const [open, setOpen] = useState(false);
     const [successOpen, setSuccessOpen] = useState(false);
@@ -59,11 +77,11 @@ export default function History() {
                 }, 1500);
             }
         }
-    }
+    };
 
     useEffect(() => {
         fetchHistory();
-    }, [])
+    }, []);
 
     const handleGenerateSummary = async (meetingId) => {
         setGeneratingId(meetingId);
@@ -98,7 +116,7 @@ export default function History() {
                 }
             });
             setMeetings(prev => prev.filter(m => m._id !== meetingId));
-            setSuccessMsg("Meeting history deleted successfully!");
+            setSuccessMsg("Meeting record deleted successfully!");
             setSuccessOpen(true);
         } catch (err) {
             console.error("Error deleting meeting:", err);
@@ -113,7 +131,7 @@ export default function History() {
         const hasDecisions = meeting.decisions && meeting.decisions.length > 0;
 
         if (!hasSummary && !hasActionItems && !hasDecisions) {
-            navigator.clipboard.writeText(`Meeting Code: ${meeting.meetingCode}\nDate: ${formatDate(meeting.date)}\nTime: ${meeting.startTime} - ${meeting.endTime}\nNo AI Insights generated yet.`);
+            navigator.clipboard.writeText(`Meeting Code: ${meeting.meetingCode}\nDate: ${formatDate(meeting.date)}\nTime: ${meeting.startTime || 'N/A'} - ${meeting.endTime || 'N/A'}\nNo AI Insights generated yet.`);
             setSuccessMsg("Copied meeting info to clipboard!");
             setSuccessOpen(true);
             return;
@@ -122,7 +140,7 @@ export default function History() {
         const text = `
 Meeting Code: ${meeting.meetingCode}
 Date: ${formatDate(meeting.date)}
-Time: ${meeting.startTime} - ${meeting.endTime}
+Time: ${meeting.startTime || 'N/A'} - ${meeting.endTime || 'N/A'}
 
 === Executive Summary ===
 ${hasSummary ? meeting.aiSummary.map(s => `• ${s}`).join('\n') : 'No summary points.'}
@@ -139,215 +157,244 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
         setSuccessOpen(true);
     };
 
-    let formatDate = (dateString) => {
+    const formatDate = (dateString) => {
         const date = new Date(dateString);
         const day = date.getDate().toString().padStart(2, "0");
-        const month = (date.getMonth() + 1).toString().padStart(2, "0")
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const year = date.getFullYear();
-        return `${day}/${month}/${year}`
-    }
+        return `${day}/${month}/${year}`;
+    };
 
     return (
-        <div className="historyContainer">
-            
-            <div className="historyHeader">
-                <IconButton className="backBtn" onClick={() => routeTo("/home")}>
-                    <HomeIcon />
-                </IconButton>
-                <div className="titleBox">
-                    <h2>Your Meeting History</h2>
-                    <p>View details of your past connections</p>
+        <div className="historyContainer lightTheme">
+            {/* Ambient Background Atmosphere */}
+            <div className="historyGlow glowTop"></div>
+            <div className="historyGlow glowBottom"></div>
+            <div className="historyGridOverlay"></div>
+
+            {/* Top Navigation & Header Bar */}
+            <header className="historyHeader">
+                <div className="historyHeaderLeft">
+                    <button className="historyBackBtn" onClick={() => routeTo("/home")} aria-label="Back to Dashboard">
+                        <HomeIcon fontSize="small" />
+                        <span>Home</span>
+                    </button>
+                    <div className="titleBox">
+                        <h2>Conference Archives</h2>
+                        <p>Past video meetings, transcripts, and AI-generated insights</p>
+                    </div>
                 </div>
-            </div>
 
-            <div className="gridContainer">
+                <div className="historyHeaderRight">
+                    <div className="sessionCountBadge">
+                        <span>{meetings.length} Total Meetings</span>
+                    </div>
+                </div>
+            </header>
+
+            {/* Cards Grid */}
+            <main className="historyContentArea">
                 {meetings.length !== 0 ? (
-                    meetings.map((e, i) => (
-                        <Card key={e._id || i} className="historyCard" variant="outlined">
-                            <CardContent className="cardContent">
-                                
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                    <Typography className="meetingCode" sx={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <CodeIcon sx={{ color: '#EB5545', fontSize: 20 }} />
-                                        {e.meetingCode}
-                                    </Typography>
-                                    <IconButton 
-                                        size="small" 
-                                        onClick={() => handleDeleteMeeting(e._id)} 
-                                        sx={{ color: 'rgba(255, 255, 255, 0.4)', '&:hover': { color: '#EB5545' } }}
-                                    >
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                </Box>
+                    <div className="gridContainer">
+                        {meetings.map((e, i) => (
+                            <Card key={e._id || i} className="historyCard" variant="outlined">
+                                <CardContent className="cardContent">
+                                    
+                                    {/* Card Top Row */}
+                                    <div className="cardHeaderRow">
+                                        <div className="codeChip">
+                                            <CodeIcon className="codeSvg" />
+                                            <span className="codeText">{e.meetingCode}</span>
+                                        </div>
+                                        <Tooltip title="Delete Record">
+                                            <IconButton 
+                                                size="small" 
+                                                onClick={() => handleDeleteMeeting(e._id)} 
+                                                className="deleteBtn"
+                                            >
+                                                <DeleteOutlineIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </div>
 
-                                <div className="cardDetails">
-                                    <Typography className="dateText">
-                                        <CalendarTodayIcon sx={{ fontSize: 16, opacity: 0.7 }} />
-                                        {formatDate(e.date)}
-                                    </Typography>
+                                    {/* Date & Time Metadata */}
+                                    <div className="cardDetailsBox">
+                                        <div className="metaRow">
+                                            <CalendarTodayIcon className="metaIcon" />
+                                            <span>{formatDate(e.date)}</span>
+                                        </div>
 
-                                    <Typography className="dateText">
-                                        <AccessTimeIcon sx={{ fontSize: 16, opacity: 0.7 }} />
-                                        {e.startTime && e.endTime ? `${e.startTime} - ${e.endTime}` : "Duration N/A"}
-                                    </Typography>
-                                </div>
+                                        <div className="metaRow">
+                                            <AccessTimeIcon className="metaIcon" />
+                                            <span>{e.startTime && e.endTime ? `${e.startTime} - ${e.endTime}` : "Call Recorded"}</span>
+                                        </div>
+                                    </div>
 
-                                <Box sx={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {e.aiSummary && e.aiSummary.length > 0 ? (
+                                    {/* Action Buttons Row */}
+                                    <div className="cardActionsWrapper">
+                                        {e.aiSummary && e.aiSummary.length > 0 ? (
+                                            <Button 
+                                                variant="contained" 
+                                                size="small"
+                                                startIcon={<AutoAwesomeIcon />}
+                                                onClick={() => {
+                                                    setActiveMeeting(e);
+                                                    setDialogOpen(true);
+                                                }}
+                                                className="viewAiBtn"
+                                            >
+                                                View AI Summary
+                                            </Button>
+                                        ) : (
+                                            <Button 
+                                                variant="outlined" 
+                                                size="small"
+                                                disabled={generatingId === e._id || !e.transcript || e.transcript.length === 0}
+                                                startIcon={generatingId === e._id ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeIcon />}
+                                                onClick={() => handleGenerateSummary(e._id)}
+                                                className="generateAiBtn"
+                                            >
+                                                {generatingId === e._id ? 'Analyzing...' : (!e.transcript || e.transcript.length === 0) ? 'No Transcript' : 'Generate Summary'}
+                                            </Button>
+                                        )}
+
                                         <Button 
-                                            variant="contained" 
+                                            variant="text" 
                                             size="small"
-                                            startIcon={<AutoAwesomeIcon />}
-                                            onClick={() => {
-                                                setActiveMeeting(e);
-                                                setDialogOpen(true);
-                                            }}
-                                            sx={{ backgroundColor: '#EB5545', '&:hover': { backgroundColor: '#ff3b2f' }, textTransform: 'none' }}
+                                            startIcon={<ContentCopyIcon />}
+                                            onClick={() => handleCopyToClipboard(e)}
+                                            className="copyDetailsBtn"
                                         >
-                                            View AI Insights
+                                            Copy Info
                                         </Button>
-                                    ) : (
-                                        <Button 
-                                            variant="outlined" 
-                                            size="small"
-                                            disabled={generatingId === e._id || !e.transcript || e.transcript.length === 0}
-                                            startIcon={generatingId === e._id ? <CircularProgress size={16} color="inherit" /> : <AutoAwesomeIcon />}
-                                            onClick={() => handleGenerateSummary(e._id)}
-                                            sx={{ 
-                                                color: '#EB5545', 
-                                                borderColor: '#EB5545', 
-                                                '&:hover': { borderColor: '#ff3b2f', backgroundColor: 'rgba(235,85,69,0.08)' },
-                                                textTransform: 'none',
-                                                '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)', borderColor: 'rgba(255,255,255,0.1)' }
-                                            }}
-                                        >
-                                            {generatingId === e._id ? 'Generating...' : (!e.transcript || e.transcript.length === 0) ? 'No Transcript' : 'Generate AI Summary'}
-                                        </Button>
-                                    )}
+                                    </div>
 
-                                    <Button 
-                                        variant="text" 
-                                        size="small"
-                                        startIcon={<ContentCopyIcon />}
-                                        onClick={() => handleCopyToClipboard(e)}
-                                        sx={{ color: 'rgba(255,255,255,0.7)', '&:hover': { color: 'white', backgroundColor: 'rgba(255,255,255,0.05)' }, textTransform: 'none' }}
-                                    >
-                                        Copy Details
-                                    </Button>
-                                </Box>
-
-                            </CardContent>
-                        </Card>
-                    ))
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 ) : (
                     <div className="emptyState">
-                        <h3>No meetings found</h3>
-                        <p>Join a meeting to see it listed here.</p>
+                        <div className="emptyIconWrapper">
+                            <HistoryToggleOffIcon className="emptySvg" />
+                        </div>
+                        <h3>No Meeting Archives Found</h3>
+                        <p>When you complete video calls, your transcripts and AI summaries will be cataloged here.</p>
+                        <Button 
+                            variant="contained" 
+                            className="emptyLaunchBtn"
+                            startIcon={<VideoCallIcon />}
+                            onClick={() => routeTo("/home")}
+                        >
+                            Start a Meeting
+                        </Button>
                     </div>
                 )}
-            </div>
+            </main>
 
-            {/* AI Insights Dialog */}
+            {/* AI Insights Dialog Modal */}
             <Dialog 
                 open={dialogOpen} 
                 onClose={() => setDialogOpen(false)}
                 maxWidth="sm"
                 fullWidth
                 PaperProps={{
+                    className: 'insightsDialogPaper',
                     sx: {
-                        backgroundColor: '#1a1a1a',
-                        color: 'white',
-                        borderRadius: '20px',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        padding: '10px'
+                        backgroundColor: '#ffffff',
+                        borderRadius: '28px',
+                        border: '1px solid rgba(226, 232, 240, 0.95)',
+                        boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.15)',
+                        padding: '12px'
                     }
                 }}
             >
                 {activeMeeting && (
                     <>
-                        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <AutoAwesomeIcon sx={{ color: '#EB5545' }} />
-                                AI Meeting Insights ({activeMeeting.meetingCode})
+                        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#0f172a', fontFamily: 'var(--font-heading)' }}>
+                                <AutoAwesomeIcon sx={{ color: '#FF453A' }} />
+                                AI Meeting Insights
                             </span>
-                            <IconButton size="small" onClick={() => setDialogOpen(false)} style={{ color: 'white' }}>
+                            <IconButton size="small" onClick={() => setDialogOpen(false)} sx={{ color: '#64748b' }}>
                                 <CloseIcon />
                             </IconButton>
                         </DialogTitle>
                         
-                        <DialogContent sx={{ borderColor: 'rgba(255,255,255,0.1)', maxHeight: '60vh', overflowY: 'auto' }}>
+                        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
                             {/* Executive Summary */}
                             <div style={{ marginBottom: '20px' }}>
-                                <Typography variant="subtitle1" sx={{ color: '#EB5545', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Typography variant="subtitle1" sx={{ color: '#0284C7', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>
                                     <DescriptionIcon fontSize="small" /> Executive Summary
                                 </Typography>
                                 {activeMeeting.aiSummary && activeMeeting.aiSummary.length > 0 ? (
-                                    <List dense sx={{ paddingLeft: '5px' }}>
+                                    <List dense sx={{ paddingLeft: '4px' }}>
                                         {activeMeeting.aiSummary.map((s, idx) => (
-                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start' }}>
-                                                <span style={{ color: '#EB5545', marginRight: '8px', fontSize: '1.1rem' }}>•</span>
-                                                <ListItemText primary={s} primaryTypographyProps={{ style: { color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', lineHeight: '1.4' } }} />
+                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.5 }}>
+                                                <span style={{ color: '#0284C7', marginRight: '8px', fontSize: '1.1rem', lineHeight: '1.2' }}>•</span>
+                                                <ListItemText primary={s} primaryTypographyProps={{ style: { color: '#334155', fontSize: '0.92rem', lineHeight: '1.5' } }} />
                                             </ListItem>
                                         ))}
                                     </List>
                                 ) : (
-                                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>No executive summary generated.</Typography>
+                                    <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>No executive summary generated.</Typography>
                                 )}
                             </div>
 
-                            <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.08)', marginBottom: '15px' }} />
+                            <Divider sx={{ my: 2 }} />
 
                             {/* Action Items */}
                             <div style={{ marginBottom: '20px' }}>
-                                <Typography variant="subtitle1" sx={{ color: '#EB5545', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Typography variant="subtitle1" sx={{ color: '#10B981', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>
                                     <CheckCircleIcon fontSize="small" /> Action Items
                                 </Typography>
                                 {activeMeeting.actionItems && activeMeeting.actionItems.length > 0 ? (
-                                    <List dense sx={{ paddingLeft: '5px' }}>
+                                    <List dense sx={{ paddingLeft: '4px' }}>
                                         {activeMeeting.actionItems.map((a, idx) => (
-                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start' }}>
-                                                <span style={{ color: '#EB5545', marginRight: '8px', fontSize: '1.1rem' }}>•</span>
-                                                <ListItemText primary={a} primaryTypographyProps={{ style: { color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', lineHeight: '1.4' } }} />
+                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.5 }}>
+                                                <span style={{ color: '#10B981', marginRight: '8px', fontSize: '1.1rem', lineHeight: '1.2' }}>•</span>
+                                                <ListItemText primary={a} primaryTypographyProps={{ style: { color: '#334155', fontSize: '0.92rem', lineHeight: '1.5' } }} />
                                             </ListItem>
                                         ))}
                                     </List>
                                 ) : (
-                                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>No action items listed.</Typography>
+                                    <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>No action items listed.</Typography>
                                 )}
                             </div>
 
-                            <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.08)', marginBottom: '15px' }} />
+                            <Divider sx={{ my: 2 }} />
 
                             {/* Decisions */}
                             <div>
-                                <Typography variant="subtitle1" sx={{ color: '#EB5545', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Typography variant="subtitle1" sx={{ color: '#FF453A', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>
                                     <GavelIcon fontSize="small" /> Key Decisions
                                 </Typography>
                                 {activeMeeting.decisions && activeMeeting.decisions.length > 0 ? (
-                                    <List dense sx={{ paddingLeft: '5px' }}>
+                                    <List dense sx={{ paddingLeft: '4px' }}>
                                         {activeMeeting.decisions.map((d, idx) => (
-                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start' }}>
-                                                <span style={{ color: '#EB5545', marginRight: '8px', fontSize: '1.1rem' }}>•</span>
-                                                <ListItemText primary={d} primaryTypographyProps={{ style: { color: 'rgba(255,255,255,0.9)', fontSize: '0.9rem', lineHeight: '1.4' } }} />
+                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.5 }}>
+                                                <span style={{ color: '#FF453A', marginRight: '8px', fontSize: '1.1rem', lineHeight: '1.2' }}>•</span>
+                                                <ListItemText primary={d} primaryTypographyProps={{ style: { color: '#334155', fontSize: '0.92rem', lineHeight: '1.5' } }} />
                                             </ListItem>
                                         ))}
                                     </List>
                                 ) : (
-                                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>No key decisions recorded.</Typography>
+                                    <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>No key decisions recorded.</Typography>
                                 )}
                             </div>
                         </DialogContent>
                         
-                        <DialogActions sx={{ padding: '15px 20px', gap: '10px' }}>
+                        <DialogActions sx={{ padding: '16px 20px', gap: '10px' }}>
                             <Button 
                                 variant="outlined" 
                                 startIcon={<ContentCopyIcon />}
                                 onClick={() => handleCopyToClipboard(activeMeeting)}
                                 sx={{ 
-                                    color: '#EB5545', 
-                                    borderColor: '#EB5545', 
-                                    '&:hover': { borderColor: '#ff3b2f', backgroundColor: 'rgba(235,85,69,0.08)' },
-                                    textTransform: 'none'
+                                    color: '#0284C7', 
+                                    borderColor: '#cbd5e1', 
+                                    borderRadius: '14px',
+                                    textTransform: 'none',
+                                    fontWeight: 700
                                 }}
                             >
                                 Copy Insights
@@ -355,9 +402,16 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
                             <Button 
                                 variant="contained" 
                                 onClick={() => setDialogOpen(false)}
-                                sx={{ backgroundColor: '#EB5545', '&:hover': { backgroundColor: '#ff3b2f' }, textTransform: 'none' }}
+                                sx={{ 
+                                    backgroundColor: '#0f172a', 
+                                    color: '#ffffff',
+                                    borderRadius: '14px',
+                                    textTransform: 'none',
+                                    fontWeight: 700,
+                                    '&:hover': { backgroundColor: '#1e293b' }
+                                }}
                             >
-                                Close
+                                Done
                             </Button>
                         </DialogActions>
                     </>
@@ -371,7 +425,7 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
                 onClose={() => setOpen(false)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert onClose={() => setOpen(false)} severity="error" sx={{ width: '100%' }}>
+                <Alert onClose={() => setOpen(false)} severity="error" sx={{ width: '100%', borderRadius: '14px' }}>
                     {error}
                 </Alert>
             </Snackbar>
@@ -383,11 +437,11 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
                 onClose={() => setSuccessOpen(false)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert onClose={() => setSuccessOpen(false)} severity="success" sx={{ width: '100%', backgroundColor: '#4caf50', color: 'white' }}>
+                <Alert onClose={() => setSuccessOpen(false)} severity="success" sx={{ width: '100%', borderRadius: '14px' }}>
                     {successMsg}
                 </Alert>
             </Snackbar>
 
         </div>
-    )
+    );
 }
