@@ -98,10 +98,14 @@ export default function History() {
             
             if (activeMeeting && activeMeeting._id === meetingId) {
                 setActiveMeeting(updatedMeeting);
+            } else {
+                setActiveMeeting(updatedMeeting);
+                setDialogOpen(true);
             }
         } catch (err) {
             console.error("Error generating summary:", err);
-            setError("Failed to generate AI summary. The transcript may be too short or contains invalid content.");
+            const serverMsg = err.response?.data?.message;
+            setError(serverMsg || "Failed to generate AI summary. Please check your network or try again.");
             setOpen(true);
         } finally {
             setGeneratingId(null);
@@ -301,90 +305,114 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
                 PaperProps={{
                     className: 'insightsDialogPaper',
                     sx: {
-                        backgroundColor: '#ffffff',
+                        backgroundColor: '#ffffff !important',
+                        color: '#0f172a !important',
                         borderRadius: '28px',
-                        border: '1px solid rgba(226, 232, 240, 0.95)',
-                        boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.15)',
-                        padding: '12px'
+                        border: '1.5px solid #e2e8f0',
+                        boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.12)',
+                        padding: '16px',
+                        backgroundImage: 'none'
                     }
                 }}
             >
                 {activeMeeting && (
                     <>
-                        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#0f172a', fontFamily: 'var(--font-heading)' }}>
-                                <AutoAwesomeIcon sx={{ color: '#FF453A' }} />
+                        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1.5, backgroundColor: '#ffffff', color: '#0f172a' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 800, color: '#0f172a', fontFamily: 'var(--font-heading)', fontSize: '1.25rem' }}>
+                                <AutoAwesomeIcon sx={{ color: '#FF453A', fontSize: '1.4rem' }} />
                                 AI Meeting Insights
                             </span>
-                            <IconButton size="small" onClick={() => setDialogOpen(false)} sx={{ color: '#64748b' }}>
+                            <IconButton size="small" onClick={() => setDialogOpen(false)} sx={{ color: '#64748b', backgroundColor: '#f1f5f9', '&:hover': { backgroundColor: '#e2e8f0', color: '#0f172a' } }}>
                                 <CloseIcon />
                             </IconButton>
                         </DialogTitle>
                         
-                        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
-                            {/* Executive Summary */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <Typography variant="subtitle1" sx={{ color: '#0284C7', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>
-                                    <DescriptionIcon fontSize="small" /> Executive Summary
+                        <DialogContent sx={{ maxHeight: '65vh', overflowY: 'auto', backgroundColor: '#ffffff', px: { xs: 1.5, sm: 2.5 }, py: 1 }}>
+                            {/* Executive Summary Section Card */}
+                            <Box sx={{ 
+                                mb: 2.5, 
+                                p: 2, 
+                                backgroundColor: '#F0F9FF', 
+                                border: '1px solid #BAE6FD', 
+                                borderRadius: '20px' 
+                            }}>
+                                <Typography variant="subtitle1" sx={{ color: '#0369A1', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', mb: 1, fontFamily: 'var(--font-heading)', fontSize: '0.98rem' }}>
+                                    <DescriptionIcon fontSize="small" sx={{ color: '#0284C7' }} /> Executive Summary
                                 </Typography>
                                 {activeMeeting.aiSummary && activeMeeting.aiSummary.length > 0 ? (
-                                    <List dense sx={{ paddingLeft: '4px' }}>
+                                    <List dense disablePadding>
                                         {activeMeeting.aiSummary.map((s, idx) => (
-                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.5 }}>
-                                                <span style={{ color: '#0284C7', marginRight: '8px', fontSize: '1.1rem', lineHeight: '1.2' }}>•</span>
-                                                <ListItemText primary={s} primaryTypographyProps={{ style: { color: '#334155', fontSize: '0.92rem', lineHeight: '1.5' } }} />
+                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.6 }}>
+                                                <span style={{ color: '#0284C7', marginRight: '10px', fontSize: '1.2rem', lineHeight: '1.2' }}>•</span>
+                                                <ListItemText 
+                                                    primary={s} 
+                                                    primaryTypographyProps={{ style: { color: '#0F172A', fontSize: '0.92rem', lineHeight: '1.55', fontWeight: 500 } }} 
+                                                />
                                             </ListItem>
                                         ))}
                                     </List>
                                 ) : (
-                                    <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>No executive summary generated.</Typography>
+                                    <Typography variant="body2" sx={{ color: '#64748B', fontStyle: 'italic', fontSize: '0.88rem' }}>No executive summary generated.</Typography>
                                 )}
-                            </div>
+                            </Box>
 
-                            <Divider sx={{ my: 2 }} />
-
-                            {/* Action Items */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <Typography variant="subtitle1" sx={{ color: '#10B981', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>
-                                    <CheckCircleIcon fontSize="small" /> Action Items
+                            {/* Action Items Section Card */}
+                            <Box sx={{ 
+                                mb: 2.5, 
+                                p: 2, 
+                                backgroundColor: '#ECFDF5', 
+                                border: '1px solid #A7F3D0', 
+                                borderRadius: '20px' 
+                            }}>
+                                <Typography variant="subtitle1" sx={{ color: '#047857', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', mb: 1, fontFamily: 'var(--font-heading)', fontSize: '0.98rem' }}>
+                                    <CheckCircleIcon fontSize="small" sx={{ color: '#10B981' }} /> Action Items
                                 </Typography>
                                 {activeMeeting.actionItems && activeMeeting.actionItems.length > 0 ? (
-                                    <List dense sx={{ paddingLeft: '4px' }}>
+                                    <List dense disablePadding>
                                         {activeMeeting.actionItems.map((a, idx) => (
-                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.5 }}>
-                                                <span style={{ color: '#10B981', marginRight: '8px', fontSize: '1.1rem', lineHeight: '1.2' }}>•</span>
-                                                <ListItemText primary={a} primaryTypographyProps={{ style: { color: '#334155', fontSize: '0.92rem', lineHeight: '1.5' } }} />
+                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.6 }}>
+                                                <span style={{ color: '#10B981', marginRight: '10px', fontSize: '1.2rem', lineHeight: '1.2' }}>•</span>
+                                                <ListItemText 
+                                                    primary={a} 
+                                                    primaryTypographyProps={{ style: { color: '#0F172A', fontSize: '0.92rem', lineHeight: '1.55', fontWeight: 500 } }} 
+                                                />
                                             </ListItem>
                                         ))}
                                     </List>
                                 ) : (
-                                    <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>No action items listed.</Typography>
+                                    <Typography variant="body2" sx={{ color: '#64748B', fontStyle: 'italic', fontSize: '0.88rem' }}>No action items listed.</Typography>
                                 )}
-                            </div>
+                            </Box>
 
-                            <Divider sx={{ my: 2 }} />
-
-                            {/* Decisions */}
-                            <div>
-                                <Typography variant="subtitle1" sx={{ color: '#FF453A', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>
-                                    <GavelIcon fontSize="small" /> Key Decisions
+                            {/* Decisions Section Card */}
+                            <Box sx={{ 
+                                p: 2, 
+                                backgroundColor: '#FFF1F2', 
+                                border: '1px solid #FECDD3', 
+                                borderRadius: '20px' 
+                            }}>
+                                <Typography variant="subtitle1" sx={{ color: '#BE123C', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', mb: 1, fontFamily: 'var(--font-heading)', fontSize: '0.98rem' }}>
+                                    <GavelIcon fontSize="small" sx={{ color: '#FF453A' }} /> Key Decisions
                                 </Typography>
                                 {activeMeeting.decisions && activeMeeting.decisions.length > 0 ? (
-                                    <List dense sx={{ paddingLeft: '4px' }}>
+                                    <List dense disablePadding>
                                         {activeMeeting.decisions.map((d, idx) => (
-                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.5 }}>
-                                                <span style={{ color: '#FF453A', marginRight: '8px', fontSize: '1.1rem', lineHeight: '1.2' }}>•</span>
-                                                <ListItemText primary={d} primaryTypographyProps={{ style: { color: '#334155', fontSize: '0.92rem', lineHeight: '1.5' } }} />
+                                            <ListItem key={idx} disableGutters sx={{ alignItems: 'flex-start', py: 0.6 }}>
+                                                <span style={{ color: '#FF453A', marginRight: '10px', fontSize: '1.2rem', lineHeight: '1.2' }}>•</span>
+                                                <ListItemText 
+                                                    primary={d} 
+                                                    primaryTypographyProps={{ style: { color: '#0F172A', fontSize: '0.92rem', lineHeight: '1.55', fontWeight: 500 } }} 
+                                                />
                                             </ListItem>
                                         ))}
                                     </List>
                                 ) : (
-                                    <Typography variant="body2" sx={{ color: '#94a3b8', fontStyle: 'italic' }}>No key decisions recorded.</Typography>
+                                    <Typography variant="body2" sx={{ color: '#64748B', fontStyle: 'italic', fontSize: '0.88rem' }}>No key decisions recorded.</Typography>
                                 )}
-                            </div>
+                            </Box>
                         </DialogContent>
                         
-                        <DialogActions sx={{ padding: '16px 20px', gap: '10px' }}>
+                        <DialogActions sx={{ padding: '16px 20px', gap: '10px', backgroundColor: '#ffffff', borderTop: '1px solid #F1F5F9' }}>
                             <Button 
                                 variant="outlined" 
                                 startIcon={<ContentCopyIcon />}
@@ -392,9 +420,15 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
                                 sx={{ 
                                     color: '#0284C7', 
                                     borderColor: '#cbd5e1', 
+                                    backgroundColor: '#ffffff',
                                     borderRadius: '14px',
                                     textTransform: 'none',
-                                    fontWeight: 700
+                                    fontWeight: 700,
+                                    fontSize: '0.9rem',
+                                    '&:hover': {
+                                        backgroundColor: '#F0F9FF',
+                                        borderColor: '#0284C7'
+                                    }
                                 }}
                             >
                                 Copy Insights
@@ -403,15 +437,22 @@ ${hasDecisions ? meeting.decisions.map(d => `• ${d}`).join('\n') : 'No decisio
                                 variant="contained" 
                                 onClick={() => setDialogOpen(false)}
                                 sx={{ 
-                                    backgroundColor: '#0f172a', 
-                                    color: '#ffffff',
+                                    backgroundColor: '#F1F5F9', 
+                                    color: '#0F172A',
+                                    border: '1px solid #CBD5E1',
                                     borderRadius: '14px',
                                     textTransform: 'none',
                                     fontWeight: 700,
-                                    '&:hover': { backgroundColor: '#1e293b' }
+                                    fontSize: '0.9rem',
+                                    boxShadow: 'none',
+                                    '&:hover': { 
+                                        backgroundColor: '#E2E8F0',
+                                        color: '#0F172A',
+                                        boxShadow: 'none'
+                                    }
                                 }}
                             >
-                                Done
+                                Close
                             </Button>
                         </DialogActions>
                     </>

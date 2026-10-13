@@ -25,11 +25,11 @@
   --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* --- Bioluminescent Palette --- */
-  --bg-void: #050608;
-  --bg-void-deep: #020304;
-  --bg-organic-surface: rgba(14, 18, 26, 0.7);
-  --bg-organic-elevated: rgba(22, 28, 40, 0.85);
+  /* --- Light Luxury Palette --- */
+  --bg-void: #FAFCFF;
+  --bg-void-deep: #F1F5F9;
+  --bg-organic-surface: rgba(255, 255, 255, 0.9);
+  --bg-organic-elevated: #ffffff;
   
   --accent-biolum-coral: #FF453A;
   --accent-biolum-cyan: #00F2FE;
@@ -40,8 +40,8 @@
   --biolum-cyan-glow: rgba(0, 242, 254, 0.35);
   --biolum-violet-glow: rgba(123, 44, 191, 0.35);
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
   --text-muted: #64748b;
 
   /* --- Organic Border Morphing Radii --- */
@@ -49,16 +49,16 @@
   --radius-biomorphic-2: 64% 36% 27% 73% / 69% 28% 72% 31%;
   --radius-biomorphic-3: 45% 55% 58% 42% / 37% 53% 47% 63%;
   --radius-organic-pill: 60px;
-  --radius-organic-card: 32px;
+  --radius-organic-card: 28px;
 
-  /* --- Tactile Shadows & Soft Inner Lighting --- */
-  --glass-bg: rgba(16, 22, 32, 0.6);
-  --glass-bg-elevated: rgba(24, 32, 46, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.12);
+  /* --- Tactile Shadows & Soft Light Glass --- */
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg-elevated: #ffffff;
+  --glass-border: rgba(226, 232, 240, 0.9);
   --glass-border-hover: rgba(255, 69, 58, 0.5);
-  --glass-blur: blur(28px) saturate(190%);
+  --glass-blur: blur(24px) saturate(180%);
 
-  --tactile-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.18), inset 0 -2px 6px rgba(0, 0, 0, 0.6), 0 25px 60px rgba(0, 0, 0, 0.85);
+  --tactile-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.8);
   --tactile-glow-coral: 0 0 35px rgba(255, 69, 58, 0.45), inset 0 0 20px rgba(255, 69, 58, 0.2);
   --tactile-glow-cyan: 0 0 35px rgba(0, 242, 254, 0.35), inset 0 0 20px rgba(0, 242, 254, 0.15);
 
@@ -208,142 +208,160 @@ a:hover {
   color: var(--accent-biolum-cyan);
 }
 
-/* 8. MATERIAL UI OVERRIDES FOR ORGANIC BIOMORPHIC THEME */
+/* 8. MATERIAL UI OVERRIDES FOR LUXURY LIGHT THEME */
 
-/* --- Organic Glass Cards & Dialog Papers --- */
+/* --- Clean Light Cards & Papers --- */
 .MuiPaper-root,
 .MuiCard-root {
-  background: var(--glass-bg-elevated) !important;
-  backdrop-filter: var(--glass-blur) !important;
-  -webkit-backdrop-filter: var(--glass-blur) !important;
-  border: 1px solid var(--glass-border) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
   border-radius: var(--radius-organic-card) !important;
-  box-shadow: var(--tactile-shadow) !important;
-  color: var(--text-primary) !important;
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08) !important;
+  color: #0f172a !important;
   position: relative;
-  overflow: hidden;
 }
 
 .MuiCard-root {
-  transition: transform 0.5s var(--ease-organic), border-color 0.5s var(--ease-organic), box-shadow 0.5s var(--ease-organic) !important;
+  transition: transform 0.3s var(--ease-organic), border-color 0.3s var(--ease-organic), box-shadow 0.3s var(--ease-organic) !important;
 }
 
 .MuiCard-root:hover {
-  border-color: var(--glass-border-hover) !important;
-  box-shadow: var(--tactile-shadow), var(--tactile-glow-coral) !important;
-  transform: translateY(-6px) scale3d(1.02, 1.02, 1) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.12) !important;
+  transform: translateY(-4px) !important;
 }
 
-/* --- Organic Outlined Inputs --- */
+/* --- Clean Light Outlined Inputs --- */
 .MuiOutlinedInput-root {
-  color: var(--text-primary) !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-radius: 20px !important;
-  transition: transform 0.4s var(--ease-organic), border-color 0.4s var(--ease-organic), box-shadow 0.4s var(--ease-organic) !important;
+  color: #0f172a !important;
+  background: rgba(248, 250, 252, 0.8) !important;
+  border-radius: 16px !important;
+  transition: border-color 0.3s var(--ease-organic), box-shadow 0.3s var(--ease-organic) !important;
 }
 
 .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(255, 255, 255, 0.25) !important;
+  border-color: #cbd5e1 !important;
 }
 
 .MuiOutlinedInput-root.Mui-focused {
-  transform: scale3d(1.02, 1.02, 1) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: #ffffff !important;
 }
 
 .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-  border-color: var(--accent-biolum-coral) !important;
-  box-shadow: var(--tactile-glow-coral) !important;
+  border-color: #0284C7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
 }
 
 .MuiOutlinedInput-notchedOutline {
-  border-color: var(--glass-border) !important;
+  border-color: #e2e8f0 !important;
   transition: var(--transition-fluid) !important;
 }
 
 .MuiInputLabel-root {
-  color: var(--text-secondary) !important;
+  color: #64748b !important;
   font-family: var(--font-body) !important;
 }
 
 .MuiInputLabel-root.Mui-focused {
-  color: var(--accent-biolum-coral) !important;
+  color: #0284C7 !important;
 }
 
-/* --- Bioluminescent Liquid Buttons --- */
+/* --- Buttons --- */
 .MuiButton-root {
   font-family: var(--font-heading) !important;
   font-weight: 700 !important;
   letter-spacing: 0.01em !important;
   border-radius: var(--radius-organic-pill) !important;
   text-transform: none !important;
-  padding: 12px 28px !important;
-  transition: transform 0.4s var(--ease-fluid-bounce), background-color 0.4s var(--ease-organic), box-shadow 0.4s var(--ease-organic) !important;
+  padding: 10px 24px !important;
+  transition: transform 0.25s var(--ease-fluid-bounce), background-color 0.25s var(--ease-organic), box-shadow 0.25s var(--ease-organic) !important;
 }
 
 .MuiButton-containedPrimary,
 .MuiButton-contained {
   background: linear-gradient(135deg, var(--accent-biolum-coral) 0%, #d6281c 100%) !important;
   color: #ffffff !important;
-  box-shadow: var(--tactile-glow-coral), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(255, 69, 58, 0.35) !important;
 }
 
 .MuiButton-containedPrimary:hover,
 .MuiButton-contained:hover {
-  transform: scale3d(1.05, 1.05, 1) translateY(-2px) !important;
-  box-shadow: 0 15px 40px rgba(255, 69, 58, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(255, 69, 58, 0.45) !important;
 }
 
 .MuiButton-outlined {
-  border: 1px solid var(--glass-border) !important;
-  color: var(--text-primary) !important;
-  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  background: #ffffff !important;
 }
 
 .MuiButton-outlined:hover {
-  border-color: var(--accent-biolum-coral) !important;
-  color: var(--accent-biolum-coral) !important;
-  background: rgba(255, 69, 58, 0.12) !important;
+  border-color: #0284C7 !important;
+  color: #0284C7 !important;
+  background: #f0f9ff !important;
   transform: translateY(-2px) !important;
 }
 
 .MuiIconButton-root {
-  color: var(--text-primary) !important;
+  color: #475569 !important;
   border-radius: 50% !important;
-  transition: transform 0.4s var(--ease-fluid-bounce), background-color 0.4s var(--ease-organic) !important;
+  transition: transform 0.25s var(--ease-fluid-bounce), background-color 0.25s var(--ease-organic) !important;
 }
 
 .MuiIconButton-root:hover {
-  background-color: rgba(255, 255, 255, 0.14) !important;
-  transform: scale(1.12) !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
-/* --- Dialog Overlay Paper --- */
+/* --- Dialog Overlay Paper (Always Pure Light) --- */
 .MuiDialog-paper {
-  background: var(--glass-bg-elevated) !important;
-  backdrop-filter: var(--glass-blur) !important;
-  -webkit-backdrop-filter: var(--glass-blur) !important;
-  border: 1px solid var(--glass-border) !important;
-  border-radius: 36px !important;
-  box-shadow: var(--tactile-shadow), 0 0 50px rgba(0, 0, 0, 0.9) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 28px !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15) !important;
+  color: #0f172a !important;
 }
 
-/* 9. CUSTOM LIQUID SCROLLBAR STYLING */
+/* --- Dropdown Menus & Popovers (Always Pure Light) --- */
+.MuiMenu-paper,
+.MuiPopover-paper {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+.MuiMenuItem-root {
+  color: #334155 !important;
+  font-family: var(--font-body) !important;
+  font-weight: 600 !important;
+}
+
+.MuiMenuItem-root:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* 9. CUSTOM LIGHT SCROLLBAR STYLING */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-void);
+  background: #f8fafc;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
+  background: #cbd5e1;
   border-radius: 20px;
-  border: 3px solid var(--bg-void);
+  border: 3px solid #f8fafc;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-biolum-coral);
+  background: #94a3b8;
 }
