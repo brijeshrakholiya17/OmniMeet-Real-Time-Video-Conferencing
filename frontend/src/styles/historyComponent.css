@@ -359,3 +359,35 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   AI MEETING INSIGHTS MODAL DIALOG - PURE LIGHT THEME & DARK TEXT
+   ========================================================================== */
+.MuiDialog-paper.insightsDialogPaper {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 28px !important;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.14) !important;
+    padding: 8px !important;
+}
+
+.insightsDialogPaper * {
+    text-shadow: none !important;
+}
+
+.insightsDialogPaper .MuiDialogTitle-root {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+.insightsDialogPaper .MuiDialogContent-root {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+.insightsDialogPaper .MuiDialogActions-root {
+    background: #ffffff !important;
+    border-top: 1px solid #f1f5f9 !important;
+}
